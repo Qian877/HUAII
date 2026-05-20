@@ -5,367 +5,470 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>槐的运营图书馆 🐙</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f5f5f5;color:#2c2c2c;min-height:100vh;}
-  .container{max-width:960px;margin:0 auto;padding:20px 16px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif;
+  background:#000;color:rgba(255,255,255,0.85);min-height:100vh;
+}
 
-  /* Header */
-  .header{text-align:center;padding:32px 0 24px;}
-  .header h1{font-size:32px;font-weight:700;letter-spacing:-0.5px;}
-  .header .sub{font-size:14px;color:#999;margin-top:6px;}
-  .header .date-badge{display:inline-block;background:#fff;border-radius:20px;padding:4px 14px;font-size:13px;color:#888;margin-top:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);}
+/* ===== Hero 区 ===== */
+.hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+.hero-title{font-size:clamp(64px,12vw,120px);font-weight:700;letter-spacing:-0.03em;color:#fff;line-height:1;margin-bottom:12px;}
+.hero-date{font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:32px;font-weight:400;}
+.hero-search-wrap{position:relative;width:100%;max-width:400px;margin-bottom:16px;}
+.hero-search-wrap input{width:100%;padding:12px 16px 12px 44px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06);border-radius:999px;font-size:14px;outline:none;color:#fff;transition:all 0.3s;}
+.hero-search-wrap input::placeholder{color:rgba(255,255,255,0.35);}
+.hero-search-wrap input:focus{border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.12);}
+.hero-search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:14px;color:rgba(255,255,255,0.35);line-height:1;}
+.hero-btn-new{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:999px;background:#fff;color:#000;font-size:14px;cursor:pointer;border:none;font-weight:500;transition:all 0.2s;}
+.hero-btn-new:hover{opacity:0.85;}
+.hero-scroll-hint{position:absolute;bottom:32px;color:rgba(255,255,255,0.2);font-size:13px;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
 
-  /* Stats bar */
-  .stats-bar{display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
-  .stat-item{background:#fff;border-radius:14px;padding:10px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.04);text-align:center;min-width:80px;}
-  .stat-item .num{font-size:20px;font-weight:700;color:#f48fb1;}
-  .stat-item .label{font-size:11px;color:#aaa;margin-top:2px;}
+/* ===== Sticky 导航栏 ===== */
+.nav-bar{position:sticky;top:0;z-index:10;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.nav-bar::-webkit-scrollbar{display:none;}
+.nav-back{display:flex;align-items:center;gap:4px;padding:4px 10px;border:none;background:none;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;white-space:nowrap;border-radius:999px;transition:all 0.2s;}
+.nav-back:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav-tab{padding:6px 16px;border-radius:999px;font-size:13px;cursor:pointer;border:none;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
+.nav-tab:hover{background:rgba(255,255,255,0.15);}
+.nav-tab.active{background:#fff;color:#000;font-weight:500;}
 
-  /* Search */
-  .search-bar{position:relative;margin-bottom:24px;}
-  .search-bar input{width:100%;padding:12px 16px 12px 44px;border:1px solid #ddd;border-radius:14px;font-size:15px;outline:none;background:#fff;transition:border 0.2s,box-shadow 0.2s;}
-  .search-bar input:focus{border-color:#f48fb1;box-shadow:0 0 0 3px rgba(244,143,177,0.12);}
-  .search-bar .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:#bbb;}
+/* ===== 书架容器 ===== */
+.shelf-area{max-width:1200px;margin:0 auto;padding:48px 96px;}
+@media(max-width:1024px){.shelf-area{padding:32px 48px;}}
+@media(max-width:640px){.shelf-area{padding:24px 16px;}}
 
-  /* Filter tabs */
-  .filter-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-  .filter-tab{padding:6px 16px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#888;transition:all 0.2s;}
-  .filter-tab:hover{background:#f5f5f5;}
-  .filter-tab.active{background:#f48fb1;color:#fff;border-color:#f48fb1;}
+/* ===== 分类区 ===== */
+.category-section{margin-bottom:32px;}
+.category-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1;display:flex;align-items:center;gap:6px;}
 
-  /* Shelf section */
-  .section-title{font-size:16px;font-weight:600;color:#2c2c2c;margin:24px 0 12px;display:flex;align-items:center;gap:8px;}
-  .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:8px;}
+/* ===== 概览模式 5列网格 ===== */
+.overview-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+@media(max-width:768px){.overview-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:480px){.overview-grid{grid-template-columns:repeat(2,1fr);}}
 
-  .book-card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.04);cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;border:1px solid transparent;position:relative;}
-  .book-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08);border-color:#e0e0e0;}
-  .book-card .icon{font-size:28px;margin-bottom:6px;}
-  .book-card .title{font-size:14px;font-weight:600;color:#2c2c2c;margin-bottom:4px;}
-  .book-card .desc{font-size:12px;color:#999;line-height:1.5;}
-  .book-card .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:8px;background:#f0f0f0;color:#888;}
-  .book-card .tag.tool{background:#fff3e0;color:#e65100;}
-  .book-card .tag.concept{background:#e3f2fd;color:#1565c0;}
-  .book-card .tag.case{background:#fce4ec;color:#c62828;}
-  .book-card .tag.data{background:#e8f5e9;color:#2e7d32;}
+.card-overview{aspect-ratio:1/1;background:rgba(255,255,255,0.08);border-radius:8px;padding:4px 6px;cursor:pointer;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;border:none;transition:background 0.2s;}
+.card-overview:hover{background:rgba(255,255,255,0.12);}
+.card-overview .emoji{font-size:16px;line-height:1;}
+.card-overview .title{font-size:10px;color:rgba(255,255,255,0.8);text-align:center;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-all;}
+.card-overview .fav-btn{position:absolute;top:2px;right:2px;width:20px;height:20px;background:none;border:none;cursor:pointer;opacity:0;transition:opacity 0.2s;color:rgba(255,255,255,0.5);font-size:12px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
+.card-overview:hover .fav-btn{opacity:1;}
+.card-overview .fav-btn.faved{opacity:1;color:#ffd700;}
 
-  /* Quick add section */
-  .quick-add{background:#fff;border-radius:16px;padding:18px 20px;margin:20px 0;box-shadow:0 1px 6px rgba(0,0,0,0.04);}
-  .quick-add .qa-title{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-  .quick-add textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:10px 12px;font-size:13px;resize:vertical;min-height:60px;outline:none;font-family:inherit;background:#fafafa;}
-  .quick-add textarea:focus{border-color:#f48fb1;}
-  .quick-add .qa-actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end;}
-  .quick-add .qa-btn{padding:6px 16px;border-radius:10px;font-size:13px;cursor:pointer;border:none;}
-  .quick-add .qa-btn.save{background:#f48fb1;color:#fff;}
-  .quick-add .qa-btn.save:hover{background:#f06292;}
+.card-add-new{aspect-ratio:1/1;border:1px dashed rgba(255,255,255,0.2);border-radius:8px;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:border-color 0.2s,background 0.2s;font-size:10px;color:rgba(255,255,255,0.4);}
+.card-add-new:hover{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);}
+.card-add-new .plus-icon{font-size:16px;line-height:1;}
 
-  /* Recent entries */
-  .recent-list{list-style:none;}
-  .recent-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0ece4;font-size:13px;}
-  .recent-item:last-child{border-bottom:none;}
-  .recent-item .ri-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-  .recent-item .ri-cat{font-size:11px;padding:1px 8px;border-radius:8px;background:#f0f0f0;color:#888;flex-shrink:0;}
-  .recent-item .ri-text{color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .recent-item .ri-time{font-size:11px;color:#aaa;flex-shrink:0;}
+/* ===== 详情模式 2列网格 ===== */
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(max-width:480px){.detail-grid{grid-template-columns:1fr;}}
 
-  /* Saved entries display */
-  .saved-entries{background:#fff;border-radius:16px;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,0.04);}
-  .saved-entries .se-title{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;justify-content:space-between;}
-  .saved-entries .se-clear{font-size:12px;color:#aaa;cursor:pointer;text-decoration:underline;}
+.card-detail{background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px;cursor:pointer;position:relative;transition:background 0.2s;border:none;}
+.card-detail:hover{background:rgba(255,255,255,0.12);}
+.card-detail .header{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.card-detail .header .emoji{font-size:16px;line-height:1;flex-shrink:0;}
+.card-detail .header .title{font-size:14px;font-weight:500;color:#fff;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card-detail .content{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-detail .date{font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;line-height:1;}
+.card-detail .fav-btn{position:absolute;top:4px;right:4px;width:20px;height:20px;background:none;border:none;cursor:pointer;opacity:0;transition:opacity 0.2s;color:rgba(255,255,255,0.5);font-size:12px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
+.card-detail:hover .fav-btn{opacity:1;}
+.card-detail .fav-btn.faved{opacity:1;color:#ffd700;}
 
-  /* Footer */
-  .footer{text-align:center;padding:24px 0 12px;font-size:12px;color:#bbb;}
+.detail-add{background:rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px;position:relative;transition:background 0.2s;border:1px dashed rgba(255,255,255,0.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:80px;color:rgba(255,255,255,0.4);font-size:12px;}
+.detail-add:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.6);}
 
-  /* No results */
-  .no-results{text-align:center;padding:32px;color:#aaa;font-size:14px;display:none;}
+/* ===== 空状态 ===== */
+.empty-state{padding:60px 20px;text-align:center;color:rgba(255,255,255,0.35);font-size:13px;line-height:1.8;}
+.empty-state .empty-icon{font-size:32px;margin-bottom:12px;line-height:1;}
 
-  /* Modal for adding entry */
-  .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:100;justify-content:center;align-items:center;}
-  .modal-overlay.show{display:flex;}
-  .modal-box{background:#fff;border-radius:18px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
-  .modal-box h3{font-size:16px;margin-bottom:12px;}
-  .modal-box input,.modal-box select,.modal-box textarea{width:100%;padding:8px 12px;border:1px solid #e0dcd4;border-radius:10px;font-size:13px;margin-bottom:10px;outline:none;font-family:inherit;}
-  .modal-box textarea{min-height:80px;resize:vertical;}
-  .modal-box .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
-  .modal-box .modal-btn{padding:8px 20px;border-radius:10px;font-size:13px;cursor:pointer;border:none;}
-  .modal-box .modal-btn.confirm{background:#f48fb1;color:#fff;}
-  .modal-box .modal-btn.cancel{background:#f0f0f0;color:#888;}
+/* ===== Footer ===== */
+.footer{text-align:center;padding:48px 16px 24px;font-size:12px;color:rgba(255,255,255,0.2);}
 
-  /* ===== Mobile Responsive ===== */
-  @media(max-width:640px){
-    .container{padding:16px 12px;}
-    .header{padding:20px 0 16px;}
-    .header h1{font-size:24px;}
-    .header .sub{font-size:13px;}
-    .stats-bar{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-    .stat-item{padding:10px 8px;min-width:0;}
-    .stat-item .num{font-size:18px;}
-    .stat-item .label{font-size:10px;}
-    .filter-tabs{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-    .filter-tabs::-webkit-scrollbar{display:none;}
-    .filter-tab{flex-shrink:0;padding:6px 14px;font-size:12px;}
-    .shelf{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
-    .book-card{padding:14px;}
-    .book-card .icon{font-size:24px;}
-    .book-card .title{font-size:13px;}
-    .book-card .desc{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-    .section-title{font-size:15px;margin:20px 0 10px;}
-    .quick-add{padding:14px 16px;margin:16px 0;}
-    .quick-add textarea{font-size:16px;} /* Prevent iOS zoom */
-    .modal-box{padding:20px;width:95%;max-width:380px;}
-    .recent-item{padding:10px 0;}
-  }
+/* ===== 详情弹窗 ===== */
+.dialog-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:40;justify-content:center;align-items:center;padding:20px;}
+.dialog-overlay.show{display:flex;}
+.dialog-panel{background:rgba(20,20,20,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:12px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.06);padding:28px;position:relative;}
+.dialog-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
+.dialog-top-left{display:flex;align-items:center;gap:8px;}
+.dialog-emoji{font-size:24px;line-height:1;}
+.dialog-actions-top{display:flex;gap:4px;flex-shrink:0;}
+.dialog-action-btn{width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;line-height:1;}
+.dialog-action-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.dialog-action-btn.faved{color:#ffd700;}
+.dialog-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.3;}
+.dialog-date{font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:16px;line-height:1;}
+.dialog-content{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:20px;white-space:pre-wrap;}
+.dialog-notes-label{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:6px;line-height:1;}
+.dialog-notes{width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:8px;font-size:13px;outline:none;color:rgba(255,255,255,0.7);resize:none;min-height:60px;font-family:inherit;margin-bottom:4px;line-height:1.5;}
+.dialog-notes:focus{border-color:rgba(255,255,255,0.15);}
+.dialog-notes::placeholder{color:rgba(255,255,255,0.2);}
 
-  @media(max-width:400px){
-    .header h1{font-size:20px;}
-    .header{padding:16px 0 12px;}
-    .shelf{grid-template-columns:1fr;gap:8px;}
-    .book-card{padding:12px;}
-    .book-card .title{font-size:14px;} /* Bigger for readability */
-    .book-card .desc{-webkit-line-clamp:3;}
-    .search-bar input{font-size:16px;padding:10px 14px 10px 40px;} /* Prevent iOS zoom */
-    .stats-bar{grid-template-columns:repeat(2,1fr);gap:6px;}
-    .stat-item{padding:8px 6px;}
-    .stat-item .num{font-size:16px;}
-  }
-
-  @media(max-width:360px){
-    .container{padding:12px 8px;}
-    .header h1{font-size:18px;}
-    .filter-tab{padding:5px 10px;font-size:11px;}
-  }
+/* ===== 新建条目弹窗 ===== */
+.new-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:40;justify-content:center;align-items:center;padding:20px;}
+.new-overlay.show{display:flex;}
+.new-panel{background:rgba(20,20,20,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:12px;max-width:420px;width:100%;border:1px solid rgba(255,255,255,0.06);padding:28px;max-height:80vh;overflow-y:auto;}
+.new-panel h3{font-size:16px;font-weight:600;color:#fff;margin-bottom:16px;}
+.new-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:14px;}
+.new-emoji-btn{width:100%;aspect-ratio:1;border-radius:6px;border:1px solid transparent;background:rgba(255,255,255,0.04);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:rgba(255,255,255,0.6);line-height:1;padding:0;}
+.new-emoji-btn:hover{background:rgba(255,255,255,0.1);}
+.new-emoji-btn.selected{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.12);color:#fff;}
+.new-panel label{font-size:11px;color:rgba(255,255,255,0.3);display:block;margin-bottom:4px;line-height:1;}
+.new-panel input,.new-panel textarea,.new-panel select{width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:13px;margin-bottom:12px;outline:none;font-family:inherit;color:rgba(255,255,255,0.85);}
+.new-panel textarea{min-height:70px;resize:vertical;}
+.new-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+.new-btn{padding:8px 20px;border-radius:8px;font-size:13px;cursor:pointer;border:none;transition:all 0.2s;}
+.new-btn.save{background:#fff;color:#000;font-weight:500;}
+.new-btn.save:hover{opacity:0.85;}
+.new-btn.cancel{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);}
 </style>
 </head>
 <body>
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <h1>📚 槐的运营图书馆</h1>
-    <div class="sub" id="dateDisplay">🐙 章鱼爬爬帮你管</div>
-    <div class="date-badge" id="todayBadge">加载中…</div>
+
+<!-- ===== Hero ===== -->
+<div class="hero" id="hero">
+  <div class="hero-title">HUAI</div>
+  <div class="hero-date" id="heroDate"></div>
+  <div class="hero-search-wrap">
+    <span class="hero-search-icon">🔍</span>
+    <input type="text" placeholder="搜索知识库…" id="heroSearch" oninput="doSearch(this.value)">
   </div>
+  <button class="hero-btn-new" onclick="openNewDialog()">＋ 新建条目</button>
+  <div class="hero-scroll-hint">↓ 向下滚动</div>
+</div>
 
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-item"><div class="num" id="statEntries">0</div><div class="label">📖 知识条目</div></div>
-    <div class="stat-item"><div class="num" id="statTools">0</div><div class="label">🛠️ 小工具</div></div>
-    <div class="stat-item"><div class="num" id="statDays">0</div><div class="label">📆 学习天数</div></div>
-    <div class="stat-item"><div class="num" id="statStreak">0</div><div class="label">🔥 连续天数</div></div>
+<!-- ===== Sticky 导航栏 ===== -->
+<nav class="nav-bar" id="navBar">
+  <button class="nav-back" id="navBack" onclick="goBack()" style="display:none;">← 全部</button>
+  <button class="nav-tab active" data-tab="all" onclick="switchView('all',this)">📋 全部</button>
+  <button class="nav-tab" data-tab="concept" onclick="switchView('concept',this)">📖 运营</button>
+  <button class="nav-tab" data-tab="data" onclick="switchView('data',this)">📊 数据</button>
+  <button class="nav-tab" data-tab="case" onclick="switchView('case',this)">💡 案例</button>
+  <button class="nav-tab" data-tab="tool" onclick="switchView('tool',this)">🛠️ AI</button>
+  <button class="nav-tab" data-tab="favorites" onclick="switchView('favorites',this)">⭐ 收藏</button>
+</nav>
+
+<!-- ===== 书架区 ===== -->
+<div class="shelf-area" id="shelfArea"></div>
+<div class="footer">🐙 章鱼爬爬 · 所有数据保存在你的电脑本地</div>
+
+<!-- ===== 详情弹窗 ===== -->
+<div class="dialog-overlay" id="detailOverlay" onclick="if(event.target===this)closeDialog()">
+  <div class="dialog-panel">
+    <div class="dialog-top">
+      <div class="dialog-top-left">
+        <span class="dialog-emoji" id="dlgEmoji">📝</span>
+        <span class="dialog-title" id="dlgTitle">DAU</span>
+      </div>
+      <div class="dialog-actions-top">
+        <button class="dialog-action-btn" id="dlgFavBtn" onclick="toggleFav()">☆</button>
+        <button class="dialog-action-btn" onclick="editEntry()">✏️</button>
+        <button class="dialog-action-btn" onclick="deleteEntry()">🗑️</button>
+        <button class="dialog-action-btn" onclick="closeDialog()">✕</button>
+      </div>
+    </div>
+    <div class="dialog-date" id="dlgDate">2026/5/20</div>
+    <div class="dialog-content" id="dlgContent">内容</div>
+    <div class="dialog-notes-label">── 补充笔记 ──</div>
+    <textarea class="dialog-notes" id="dlgNotes" placeholder="在这里补充笔记…" oninput="saveNotes()"></textarea>
   </div>
+</div>
 
-  <!-- Search -->
-  <div class="search-bar">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="搜索知识库…" oninput="filterLibrary()">
-  </div>
-
-  <!-- Filter tabs -->
-  <div class="filter-tabs" id="filterTabs">
-    <span class="filter-tab active" data-filter="all" onclick="setFilter('all',this)">📋 全部</span>
-    <span class="filter-tab" data-filter="concept" onclick="setFilter('concept',this)">📖 概念</span>
-    <span class="filter-tab" data-filter="data" onclick="setFilter('data',this)">📊 数据</span>
-    <span class="filter-tab" data-filter="case" onclick="setFilter('case',this)">💡 案例</span>
-    <span class="filter-tab" data-filter="tool" onclick="setFilter('tool',this)">🛠️ 工具</span>
-    <span class="filter-tab" data-filter="diary" onclick="setFilter('diary',this)">📝 日记</span>
-  </div>
-
-  <!-- Book shelves -->
-  <div id="shelfContainer"></div>
-
-  <!-- No results -->
-  <div class="no-results" id="noResults">🔍 没找到相关内容，试试换个关键词？</div>
-
-  <!-- Quick add -->
-  <div class="quick-add">
-    <div class="qa-title">✍️ 快速记录</div>
-    <textarea id="quickText" placeholder="今天学到了什么？或有什么新想法？&#10;比如：今天学会了RFM模型…"></textarea>
-    <div class="qa-actions">
-      <button class="qa-btn save" onclick="quickSave()">📥 存进知识库</button>
+<!-- ===== 新建条目弹窗 ===== -->
+<div class="new-overlay" id="newOverlay" onclick="if(event.target===this)closeNewDialog()">
+  <div class="new-panel">
+    <h3>✏️ 新建条目</h3>
+    <label>选择图标</label>
+    <div class="new-emoji-grid" id="emojiGrid"></div>
+    <label>标题</label>
+    <input type="text" id="newTitle" placeholder="输入标题…">
+    <label>内容</label>
+    <textarea id="newContent" placeholder="输入内容…"></textarea>
+    <label>分类</label>
+    <select id="newCat">
+      <option value="concept">📖 运营概念</option>
+      <option value="data">📊 数据指标</option>
+      <option value="case">💡 真实案例</option>
+      <option value="tool">🛠️ AI工具</option>
+      <option value="diary">📝 学习日记</option>
+    </select>
+    <div class="new-actions">
+      <button class="new-btn cancel" onclick="closeNewDialog()">取消</button>
+      <button class="new-btn save" onclick="saveNewEntry()">保存</button>
     </div>
   </div>
-
-  <!-- Footer -->
-  <div class="footer">🐙 章鱼爬爬 · 槐的个人运营图书馆 · 所有数据保存在你的电脑本地</div>
 </div>
 
 <script>
-  // ====== Sample Knowledge Base ======
-  let library = [];
+// ====== DATA ======
+let library = [];
+let currentView = 'all';
+let currentItemId = null;
+let selectedEmoji = '📝';
+const EMOJIS = ['📝','💡','🔥','⭐','📌','🎯','⚡','🔧','🧠','📊','🎮','🛠️','📖','💻','🤖','✨'];
+const CAT_NAMES = {concept:'📖 运营概念',data:'📊 数据指标',case:'💡 真实案例',tool:'🛠️ AI工具',diary:'📝 学习日记'};
+const CAT_SHORT = {concept:'📖 运营',data:'📊 数据',case:'💡 案例',tool:'🛠️ AI',diary:'📝 日记'};
 
-  function initLibrary(){
-    const saved=localStorage.getItem('huaiLibrary');
-    if(saved){library=JSON.parse(saved);render();return;}
-    library=[
-      {id:1,cat:'concept',title:'DAU（日活跃用户）',desc:'一天内登录游戏的独立用户数量。衡量产品规模的核心指标',time:Date.now()-86400000*1},
-      {id:2,cat:'concept',title:'MAU（月活跃用户）',desc:'一个月内登录游戏的独立用户数量。DAU/MAU可衡量用户粘性',time:Date.now()-86400000*2},
-      {id:3,cat:'concept',title:'留存率',desc:'新增用户在第N天后仍在玩的比例。次日/7日/30日留存是三大黄金指标',time:Date.now()-86400000*2},
-      {id:4,cat:'concept',title:'ARPU（每用户平均收入）',desc:'总收入÷总用户数。衡量每个用户贡献多少收入',time:Date.now()-86400000*3},
-      {id:5,cat:'concept',title:'LTV（生命周期价值）',desc:'一个用户从来到走，总共贡献的收入。LTV > CAC 才健康',time:Date.now()-86400000*3},
-      {id:6,cat:'concept',title:'A/B测试',desc:'对照组 vs 实验组，用数据做决策。p<0.05才算显著',time:Date.now()-86400000*1},
-      {id:7,cat:'concept',title:'RFM模型',desc:'最近消费(R)+消费频率(F)+消费金额(M)。把用户分成8层',time:Date.now()-86400000*4},
-      {id:8,cat:'concept',title:'AARRR模型',desc:'获取→激活→留存→收入→传播。海盗指标，运营框架',time:Date.now()-86400000*4},
-      {id:9,cat:'concept',title:'用户分层',desc:'不是所有用户都一样，按价值/行为分群，差异化运营',time:Date.now()-86400000*5},
-      {id:10,cat:'data',title:'付费渗透率',desc:'付费用户÷活跃用户×100%。休闲2-5%/中度5-10%/重度10-20%',time:Date.now()-86400000*2},
-      {id:11,cat:'data',title:'次日留存健康值',desc:'休闲30-40%/中度40-45%/重度45%+。低于30%需排查问题',time:Date.now()-86400000*3},
-      {id:12,cat:'data',title:'7日留存健康值',desc:'休闲15-20%/中度20-25%/重度25%+。反映一周体验是否留住人',time:Date.now()-86400000*3},
-      {id:13,cat:'data',title:'DAU成本',desc:'(买量+活动+服务器+人力)÷DAU。LTV需大于DAU成本×平均生命周期',time:Date.now()-86400000*4},
-      {id:14,cat:'data',title:'月流失率',desc:'休闲20-40%/中度15-25%/重度5-15%。超过50%需紧急排查',time:Date.now()-86400000*5},
-      {id:15,cat:'case',title:'春节DAU翻倍案例',desc:'某游戏春节活动：签到送限定+红包雨+好友召回。DAU从50万涨到120万',time:Date.now()-86400000*6},
-      {id:16,cat:'case',title:'首充礼包A/B测试',desc:'测3种礼包：6元档/12元档/6+12组合。6元转化率最高',time:Date.now()-86400000*7},
-      {id:17,cat:'case',title:'新手签到奖励设计',desc:'你正在做的！方案A（648金币）vs方案B（限定外观）的A/B测试',time:Date.now()-86400000*0},
-      {id:18,cat:'tool',title:'A/B测试结果分析器',desc:'输入A/B组数据，自动判断显著性 → 桌面 A-B测试分析器.html',time:Date.now()-86400000*0},
-      {id:19,cat:'tool',title:'运营健康度检查器',desc:'输入5个指标→自动判断「健康/关注/预警」→ 待做',time:Date.now()-86400000*0},
-      {id:20,cat:'tool',title:'上线检查清单',desc:'活动上线前逐项打勾，全部完成才可上线 → 待做',time:Date.now()-86400000*0},
-      {id:21,cat:'tool',title:'文案生成器',desc:'输入活动信息→一键生成公告/Push/社媒文案→ 待做',time:Date.now()-86400000*0},
-      {id:22,cat:'tool',title:'运营术语卡片机',desc:'40个术语翻转卡片，每日复习 → 待做',time:Date.now()-86400000*0},
-    ];
-    saveLib();render();
+// ====== Init ======
+function init(){
+  const saved = localStorage.getItem('huaiLibrary');
+  if(saved){library = JSON.parse(saved);}else{loadDefaults();}
+  renderEmojiGrid();
+  updateHeroDate();
+  render();
+}
+
+function loadDefaults(){
+  library = [
+    {id:1,icon:'📖',cat:'concept',title:'DAU（日活跃用户）',content:'一天内登录游戏的独立用户数量。衡量产品规模的核心指标',notes:'',fav:false,time:Date.now()-864e5*1},
+    {id:2,icon:'📖',cat:'concept',title:'MAU（月活跃用户）',content:'一个月内登录游戏的独立用户数量。DAU/MAU可衡量用户粘性',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:3,icon:'📖',cat:'concept',title:'留存率',content:'新增用户在第N天后仍在玩的比例。次日/7日/30日留存是三大黄金指标',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:4,icon:'📖',cat:'concept',title:'ARPU（每用户平均收入）',content:'总收入÷总用户数。衡量每个用户贡献多少收入',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:5,icon:'📖',cat:'concept',title:'LTV（生命周期价值）',content:'一个用户从来到走，总共贡献的收入。LTV > CAC 才健康',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:6,icon:'📖',cat:'concept',title:'A/B测试',content:'对照组 vs 实验组，用数据做决策。p<0.05才算显著',notes:'',fav:false,time:Date.now()-864e5*1},
+    {id:7,icon:'📖',cat:'concept',title:'RFM模型',content:'最近消费(R)+消费频率(F)+消费金额(M)。把用户分成8层',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:8,icon:'📖',cat:'concept',title:'AARRR模型',content:'获取→激活→留存→收入→传播。海盗指标，运营框架',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:9,icon:'📖',cat:'concept',title:'用户分层',content:'不是所有用户都一样，按价值/行为分群，差异化运营',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:10,icon:'📊',cat:'data',title:'付费渗透率',content:'付费用户÷活跃用户×100%。休闲2-5%/中度5-10%/重度10-20%',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:11,icon:'📊',cat:'data',title:'次日留存健康值',content:'休闲30-40%/中度40-45%/重度45%+。低于30%需排查问题',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:12,icon:'📊',cat:'data',title:'7日留存健康值',content:'休闲15-20%/中度20-25%/重度25%+。反映一周体验是否留住人',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:13,icon:'📊',cat:'data',title:'DAU成本',content:'(买量+活动+服务器+人力)÷DAU。LTV需大于DAU成本×平均生命周期',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:14,icon:'📊',cat:'data',title:'月流失率',content:'休闲20-40%/中度15-25%/重度5-15%。超过50%需紧急排查',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:15,icon:'💡',cat:'case',title:'春节DAU翻倍案例',content:'某游戏春节活动：签到送限定+红包雨+好友召回。DAU从50万涨到120万',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:16,icon:'💡',cat:'case',title:'首充礼包A/B测试',content:'测3种礼包：6元档/12元档/6+12组合。6元转化率最高',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:17,icon:'💡',cat:'case',title:'新手签到奖励设计',content:'你正在做的A/B测试！方案A（648金币）vs方案B（限定外观）',notes:'',fav:false,time:Date.now()},
+    {id:18,icon:'🛠️',cat:'tool',title:'A/B测试结果分析器',content:'输入A/B组数据，自动判断显著性',notes:'',fav:false,time:Date.now()},
+    {id:19,icon:'🛠️',cat:'tool',title:'运营健康度检查器',content:'输入5个指标→自动判断「健康/关注/预警」',notes:'',fav:false,time:Date.now()},
+    {id:20,icon:'🛠️',cat:'tool',title:'上线检查清单',content:'活动上线前逐项打勾，全部完成才可上线',notes:'',fav:false,time:Date.now()},
+    {id:21,icon:'🛠️',cat:'tool',title:'文案生成器',content:'输入活动信息→一键生成公告/Push/社媒文案',notes:'',fav:false,time:Date.now()},
+    {id:22,icon:'🛠️',cat:'tool',title:'运营术语卡片机',content:'40个术语翻转卡片，每日复习',notes:'',fav:false,time:Date.now()},
+  ];
+  save();
+}
+
+function save(){localStorage.setItem('huaiLibrary',JSON.stringify(library));}
+
+function updateHeroDate(){
+  const n=new Date();const w=['日','一','二','三','四','五','六'];
+  document.getElementById('heroDate').textContent=`${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日 星期${w[n.getDay()]}`;
+}
+
+// ====== Navigation ======
+function switchView(view,btn){
+  currentView = view;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const back = document.getElementById('navBack');
+  back.style.display = (view==='all')?'none':'flex';
+  render();
+  // smooth scroll to shelf
+  document.getElementById('shelfArea').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function goBack(){
+  const allBtn = document.querySelector('.nav-tab[data-tab="all"]');
+  switchView('all',allBtn);
+}
+
+// ====== Search ======
+function doSearch(val){
+  const term = val.trim().toLowerCase();
+  if(!term){render();return;}
+  const filtered = library.filter(i=>i.title.toLowerCase().includes(term)||i.content.toLowerCase().includes(term));
+  renderSearchResults(filtered,term);
+}
+
+function renderSearchResults(items,term){
+  const area = document.getElementById('shelfArea');
+  if(items.length===0){
+    area.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div>没找到「'+term+'」相关内容<br>试试换个关键词？</div>';
+    return;
   }
+  let html='<div class="category-title" style="margin-bottom:14px;">🔍 搜索结果 · 共'+items.length+'条</div><div class="detail-grid">';
+  items.forEach(i=>{
+    const d=new Date(i.time);
+    html+=`<div class="card-detail" onclick="openDetail(${i.id})">
+      <div class="header"><span class="emoji">${i.icon}</span><span class="title">${i.title}</span></div>
+      <div class="content">${i.content}</div>
+      <div class="date">${d.getMonth()+1}/${d.getDate()}</div>
+    </div>`;
+  });
+  html+='</div>';
+  area.innerHTML=html;
+  document.getElementById('navBack').style.display='flex';
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+}
 
-  function saveLib(){localStorage.setItem('huaiLibrary',JSON.stringify(library));}
+// ====== Render ======
+function render(){
+  const area = document.getElementById('shelfArea');
+  if(currentView==='all'){renderOverview(area);return;}
+  if(currentView==='favorites'){renderFavorites(area);return;}
+  renderCategoryDetail(area,currentView);
+}
 
-  // ====== Render ======
-  let currentFilter='all';
-  let currentSearch='';
-
-  function render(){
-    renderShelves();
-    updateStats();
-    updateDate();
-  }
-
-  function renderShelves(){
-    const container=document.getElementById('shelfContainer');
-    const search=document.getElementById('searchInput').value.toLowerCase().trim();
-    currentSearch=search;
-
-    let filtered=library.filter(item=>{
-      if(currentFilter!=='all'&&item.cat!==currentFilter)return false;
-      if(search&&!item.title.toLowerCase().includes(search)&&!item.desc.toLowerCase().includes(search))return false;
-      return true;
+function renderOverview(area){
+  const cats = {concept:[],data:[],case:[],tool:[],diary:[]};
+  library.forEach(i=>{if(cats[i.cat])cats[i.cat].push(i);});
+  let html='';
+  for(const[key,items]of Object.entries(cats)){
+    if(items.length===0)continue;
+    html+=`<div class="category-section"><div class="category-title">${CAT_NAMES[key]}</div><div class="overview-grid">`;
+    items.sort((a,b)=>b.time-a.time).forEach(i=>{
+      html+=`<div class="card-overview" onclick="openDetail(${i.id})">
+        <button class="fav-btn ${i.fav?'faved':''}" onclick="event.stopPropagation();toggleFavQuick(${i.id})">${i.fav?'★':'☆'}</button>
+        <span class="emoji">${i.icon||'📝'}</span>
+        <span class="title">${i.title}</span>
+      </div>`;
     });
-
-    document.getElementById('noResults').style.display=filtered.length===0?'block':'none';
-    if(filtered.length===0){container.innerHTML='';return;}
-
-    // Group by category
-    const cats={concept:[],data:[],case:[],tool:[],diary:[]};
-    filtered.forEach(item=>{if(cats[item.cat])cats[item.cat].push(item);});
-
-    const catNames={concept:'📖 核心概念',data:'📊 数据指标',case:'💡 真实案例',tool:'🛠️ 效率工具',diary:'📝 学习日记'};
-    const catTags={concept:'concept',data:'data',case:'case',tool:'tool',diary:'concept'};
-
-    let html='';
-    for(const [key,items] of Object.entries(cats)){
-      if(items.length===0)continue;
-      html+=`<div class="section-title">${catNames[key]}<span style="font-size:12px;color:#aaa;font-weight:400;">（${items.length}条）</span></div>`;
-      html+=`<div class="shelf">`;
-      items.sort((a,b)=>b.time-a.time).forEach(item=>{
-        const d=new Date(item.time);
-        const dateStr=`${d.getMonth()+1}/${d.getDate()}`;
-        html+=`<div class="book-card" onclick="openEdit(${item.id})">
-          <div class="icon">${item.cat==='concept'?'📖':item.cat==='data'?'📊':item.cat==='case'?'💡':item.cat==='tool'?'🛠️':'📝'}</div>
-          <div class="title">${item.title}</div>
-          <div class="desc">${item.desc}</div>
-          <span class="tag ${catTags[item.cat]}">${catNames[item.cat].replace(/[^\u4e00-\u9fa5a-zA-Z]/g,'')}</span>
-          <span style="font-size:10px;color:#bbb;margin-left:6px;">${dateStr}</span>
-        </div>`;
-      });
-      html+=`</div>`;
-    }
-    container.innerHTML=html;
+    // Add new button
+    html+=`<div class="card-add-new" onclick="openNewDialog()"><span class="plus-icon">＋</span>新增</div>`;
+    html+=`</div></div>`;
   }
+  area.innerHTML=html||'<div class="empty-state">还没有内容，点击上方「＋ 新建条目」开始记录</div>';
+}
 
-  function updateStats(){
-    const concepts=library.filter(i=>i.cat==='concept').length;
-    const data=library.filter(i=>i.cat==='data').length;
-    const cases=library.filter(i=>i.cat==='case').length;
-    const tools=library.filter(i=>i.cat==='tool').length;
-    const diary=library.filter(i=>i.cat==='diary').length;
-    document.getElementById('statEntries').textContent=library.length;
-
-    // Count unique tool dates
-    const toolDates=new Set(library.filter(i=>i.cat==='tool').map(i=>new Date(i.time).toDateString()));
-    document.getElementById('statTools').textContent=tools;
-
-    // Learning days: count days where entries were added
-    const days=new Set(library.map(i=>new Date(i.time).toDateString()));
-    document.getElementById('statDays').textContent=days.size;
-
-    // Streak: consecutive days ending today
-    const sortedDays=[...days].sort((a,b)=>new Date(b)-new Date(a));
-    let streak=0;
-    const today=new Date();today.setHours(0,0,0,0);
-    for(let i=0;i<sortedDays.length;i++){
-      const d=new Date(sortedDays[i]);d.setHours(0,0,0,0);
-      const diff=Math.round((today-d)/(86400000));
-      if(diff===streak)streak++;
-      else break;
-    }
-    document.getElementById('statStreak').textContent=streak;
+function renderCategoryDetail(area,cat){
+  const items = library.filter(i=>i.cat===cat).sort((a,b)=>b.time-a.time);
+  if(items.length===0){
+    area.innerHTML=`<div class="empty-state"><div class="empty-icon">📂</div>这个分类还没有内容<br><button class="hero-btn-new" style="margin-top:12px;" onclick="openNewDialog()">＋ 添加条目</button></div>`;
+    return;
   }
+  let html=`<div class="category-title">${CAT_NAMES[cat]}</div><div class="detail-grid">`;
+  items.forEach(i=>{
+    const d=new Date(i.time);
+    html+=`<div class="card-detail" onclick="openDetail(${i.id})">
+      <button class="fav-btn ${i.fav?'faved':''}" onclick="event.stopPropagation();toggleFavQuick(${i.id})">${i.fav?'★':'☆'}</button>
+      <div class="header"><span class="emoji">${i.icon||'📝'}</span><span class="title">${i.title}</span></div>
+      <div class="content">${i.content}</div>
+      <div class="date">${d.getMonth()+1}/${d.getDate()}</div>
+    </div>`;
+  });
+  html+=`<div class="detail-add" onclick="openNewDialog()"><span style="font-size:18px;line-height:1;">＋</span>添加条目</div>`;
+  html+=`</div>`;
+  area.innerHTML=html;
+}
 
-  function updateDate(){
-    const now=new Date();
-    const wk=['日','一','二','三','四','五','六'];
-    document.getElementById('todayBadge').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${wk[now.getDay()]}`;
+function renderFavorites(area){
+  const items = library.filter(i=>i.fav).sort((a,b)=>b.time-a.time);
+  if(items.length===0){
+    area.innerHTML='<div class="empty-state"><div class="empty-icon">⭐</div>还没有收藏条目<br>在卡片上点击 ☆ 即可收藏</div>';
+    return;
   }
+  let html='<div class="category-title">⭐ 收藏条目 · 共'+items.length+'条</div><div class="detail-grid">';
+  items.forEach(i=>{
+    const d=new Date(i.time);
+    html+=`<div class="card-detail" onclick="openDetail(${i.id})">
+      <button class="fav-btn faved" onclick="event.stopPropagation();toggleFavQuick(${i.id})">★</button>
+      <div class="header"><span class="emoji">${i.icon||'📝'}</span><span class="title">${i.title}</span></div>
+      <div class="content">${i.content}</div>
+      <div class="date">${d.getMonth()+1}/${d.getDate()}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  area.innerHTML=html;
+}
 
-  // ====== Filter & Search ======
-  function setFilter(filter,el){
-    currentFilter=filter;
-    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
-    el.classList.add('active');
-    renderShelves();
+// ====== Detail Dialog ======
+function openDetail(id){
+  const i = library.find(x=>x.id===id);
+  if(!i)return;
+  currentItemId = id;
+  document.getElementById('dlgEmoji').textContent = i.icon||'📝';
+  document.getElementById('dlgTitle').textContent = i.title;
+  document.getElementById('dlgContent').textContent = i.content;
+  const d=new Date(i.time);
+  document.getElementById('dlgDate').textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+  document.getElementById('dlgNotes').value = i.notes||'';
+  const fav = document.getElementById('dlgFavBtn');
+  fav.textContent = i.fav?'★':'☆';
+  fav.classList.toggle('faved',!!i.fav);
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function closeDialog(){document.getElementById('detailOverlay').classList.remove('show');}
+
+function toggleFav(){
+  const i = library.find(x=>x.id===currentItemId);
+  if(!i)return;
+  i.fav = !i.fav;
+  save();render();
+  document.getElementById('dlgFavBtn').textContent = i.fav?'★':'☆';
+  document.getElementById('dlgFavBtn').classList.toggle('faved',!!i.fav);
+}
+
+function toggleFavQuick(id){
+  const i = library.find(x=>x.id===id);
+  if(!i)return;
+  i.fav = !i.fav;
+  save();render();
+}
+
+function saveNotes(){
+  const i = library.find(x=>x.id===currentItemId);
+  if(!i)return;
+  i.notes = document.getElementById('dlgNotes').value;
+  save();
+}
+
+function editEntry(){
+  const i = library.find(x=>x.id===currentItemId);
+  if(!i)return;
+  closeDialog();
+  setTimeout(()=>{
+    document.getElementById('newTitle').value = i.title;
+    document.getElementById('newContent').value = i.content;
+    document.getElementById('newCat').value = i.cat;
+    selectedEmoji = i.icon||'📝';
+    renderEmojiGrid();
+    document.getElementById('newOverlay').classList.add('show');
+    // Mark as editing
+    document.getElementById('newOverlay').dataset.edit = currentItemId;
+  },200);
+}
+
+function deleteEntry(){
+  if(!confirm('确定删除「'+library.find(x=>x.id===currentItemId)?.title+'」？'))return;
+  library = library.filter(x=>x.id!==currentItemId);
+  save();render();closeDialog();
+}
+
+// ====== New Entry Dialog ======
+function renderEmojiGrid(){
+  const g=document.getElementById('emojiGrid');
+  g.innerHTML=EMOJIS.map(e=>`<button class="new-emoji-btn${e===selectedEmoji?' selected':''}" onclick="event.preventDefault();selectEmoji('${e}')">${e}</button>`).join('');
+}
+function selectEmoji(e){selectedEmoji=e;renderEmojiGrid();}
+
+function openNewDialog(){
+  document.getElementById('newOverlay').dataset.edit='';
+  document.getElementById('newTitle').value='';
+  document.getElementById('newContent').value='';
+  document.getElementById('newCat').value='concept';
+  selectedEmoji='📝';
+  renderEmojiGrid();
+  document.getElementById('newOverlay').classList.add('show');
+}
+
+function closeNewDialog(){document.getElementById('newOverlay').classList.remove('show');}
+
+function saveNewEntry(){
+  const title = document.getElementById('newTitle').value.trim();
+  const content = document.getElementById('newContent').value.trim();
+  if(!title||!content){alert('标题和内容不能为空～');return;}
+  const editId = document.getElementById('newOverlay').dataset.edit;
+  if(editId){
+    const i = library.find(x=>x.id==parseInt(editId));
+    if(i){i.title=title;i.content=content;i.cat=document.getElementById('newCat').value;i.icon=selectedEmoji;save();}
+  } else {
+    library.push({id:Date.now(),icon:selectedEmoji,cat:document.getElementById('newCat').value,title,content,notes:'',fav:false,time:Date.now()});
+    save();
   }
+  closeNewDialog();render();
+}
 
-  function filterLibrary(){
-    renderShelves();
-  }
-
-  // ====== Quick Save ======
-  function quickSave(){
-    const text=document.getElementById('quickText').value.trim();
-    if(!text){alert('先写点内容再存～');return;}
-    const lines=text.split('\n').filter(l=>l.trim());
-    const firstLine=lines[0].substring(0,40);
-    const rest=lines.slice(1).join(' ').substring(0,100)||firstLine;
-
-    // Ask for category
-    const cat=prompt('选个分类：\n1=📖 概念  2=📊 数据  3=💡 案例  4=🛠️ 工具  5=📝 日记','5');
-    const catMap={'1':'concept','2':'data','3':'case','4':'tool','5':'diary'};
-    const catName=catMap[cat]||'diary';
-
-    library.push({
-      id:Date.now(),
-      cat:catName,
-      title:firstLine,
-      desc:rest,
-      time:Date.now()
-    });
-    saveLib();
-    document.getElementById('quickText').value='';
-    render();
-    alert('✅ 已保存！');
-  }
-
-  // ====== Edit / Delete ======
-  function openEdit(id){
-    const item=library.find(i=>i.id===id);
-    if(!item)return;
-    const title=prompt('修改标题：',item.title);
-    if(title===null)return;
-    const desc=prompt('修改描述：',item.desc);
-    if(desc===null)return;
-    const catPrompt=prompt('修改分类：\n1=概念 2=数据 3=案例 4=工具 5=日记\n留空不改','');
-    const catMap={'1':'concept','2':'data','3':'case','4':'tool','5':'diary'};
-    item.title=title;
-    item.desc=desc;
-    if(catPrompt&&catMap[catPrompt])item.cat=catMap[catPrompt];
-    saveLib();render();
-  }
-
-  // ====== Init ======
-  initLibrary();
+// ====== Start ======
+init();
 </script>
 </body>
 </html>
