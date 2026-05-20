@@ -145,7 +145,11 @@ body{
   <button class="nav-tab" data-tab="concept" onclick="switchView('concept',this)">📖 运营</button>
   <button class="nav-tab" data-tab="data" onclick="switchView('data',this)">📊 数据</button>
   <button class="nav-tab" data-tab="case" onclick="switchView('case',this)">💡 案例</button>
-  <button class="nav-tab" data-tab="tool" onclick="switchView('tool',this)">🛠️ AI</button>
+  <button class="nav-tab" data-tab="tool" onclick="switchView('tool',this)">🛠️ 工具</button>
+  <button class="nav-tab" data-tab="game" onclick="switchView('game',this)">🎮 游戏</button>
+  <button class="nav-tab" data-tab="product" onclick="switchView('product',this)">📈 产品</button>
+  <button class="nav-tab" data-tab="industry" onclick="switchView('industry',this)">🌐 行业</button>
+  <button class="nav-tab" data-tab="book" onclick="switchView('book',this)">📚 书单</button>
   <button class="nav-tab" data-tab="favorites" onclick="switchView('favorites',this)">⭐ 收藏</button>
 </nav>
 
@@ -207,7 +211,7 @@ let currentView = 'all';
 let currentItemId = null;
 let selectedEmoji = '📝';
 const EMOJIS = ['📝','💡','🔥','⭐','📌','🎯','⚡','🔧','🧠','📊','🎮','🛠️','📖','💻','🤖','✨'];
-const CAT_NAMES = {concept:'📖 运营概念',data:'📊 数据指标',case:'💡 真实案例',tool:'🛠️ AI工具',diary:'📝 学习日记'};
+const CAT_NAMES = {concept:'📖 运营概念',data:'📊 行业数据',case:'💡 经典案例',tool:'🛠️ 效率工具',game:'🎮 游戏运营',product:'📈 产品运营',industry:'🌐 行业知识',book:'📚 推荐书单',slang:'🎯 行业黑话',diary:'📝 学习日记'};
 const CAT_SHORT = {concept:'📖 运营',data:'📊 数据',case:'💡 案例',tool:'🛠️ AI',diary:'📝 日记'};
 
 // ====== Init ======
@@ -221,28 +225,126 @@ function init(){
 
 function loadDefaults(){
   library = [
-    {id:1,icon:'📖',cat:'concept',title:'DAU（日活跃用户）',content:'一天内登录游戏的独立用户数量。衡量产品规模的核心指标',notes:'',fav:false,time:Date.now()-864e5*1},
-    {id:2,icon:'📖',cat:'concept',title:'MAU（月活跃用户）',content:'一个月内登录游戏的独立用户数量。DAU/MAU可衡量用户粘性',notes:'',fav:false,time:Date.now()-864e5*2},
-    {id:3,icon:'📖',cat:'concept',title:'留存率',content:'新增用户在第N天后仍在玩的比例。次日/7日/30日留存是三大黄金指标',notes:'',fav:false,time:Date.now()-864e5*2},
-    {id:4,icon:'📖',cat:'concept',title:'ARPU（每用户平均收入）',content:'总收入÷总用户数。衡量每个用户贡献多少收入',notes:'',fav:false,time:Date.now()-864e5*3},
-    {id:5,icon:'📖',cat:'concept',title:'LTV（生命周期价值）',content:'一个用户从来到走，总共贡献的收入。LTV > CAC 才健康',notes:'',fav:false,time:Date.now()-864e5*3},
-    {id:6,icon:'📖',cat:'concept',title:'A/B测试',content:'对照组 vs 实验组，用数据做决策。p<0.05才算显著',notes:'',fav:false,time:Date.now()-864e5*1},
-    {id:7,icon:'📖',cat:'concept',title:'RFM模型',content:'最近消费(R)+消费频率(F)+消费金额(M)。把用户分成8层',notes:'',fav:false,time:Date.now()-864e5*4},
-    {id:8,icon:'📖',cat:'concept',title:'AARRR模型',content:'获取→激活→留存→收入→传播。海盗指标，运营框架',notes:'',fav:false,time:Date.now()-864e5*4},
-    {id:9,icon:'📖',cat:'concept',title:'用户分层',content:'不是所有用户都一样，按价值/行为分群，差异化运营',notes:'',fav:false,time:Date.now()-864e5*5},
-    {id:10,icon:'📊',cat:'data',title:'付费渗透率',content:'付费用户÷活跃用户×100%。休闲2-5%/中度5-10%/重度10-20%',notes:'',fav:false,time:Date.now()-864e5*2},
-    {id:11,icon:'📊',cat:'data',title:'次日留存健康值',content:'休闲30-40%/中度40-45%/重度45%+。低于30%需排查问题',notes:'',fav:false,time:Date.now()-864e5*3},
-    {id:12,icon:'📊',cat:'data',title:'7日留存健康值',content:'休闲15-20%/中度20-25%/重度25%+。反映一周体验是否留住人',notes:'',fav:false,time:Date.now()-864e5*3},
-    {id:13,icon:'📊',cat:'data',title:'DAU成本',content:'(买量+活动+服务器+人力)÷DAU。LTV需大于DAU成本×平均生命周期',notes:'',fav:false,time:Date.now()-864e5*4},
-    {id:14,icon:'📊',cat:'data',title:'月流失率',content:'休闲20-40%/中度15-25%/重度5-15%。超过50%需紧急排查',notes:'',fav:false,time:Date.now()-864e5*5},
-    {id:15,icon:'💡',cat:'case',title:'春节DAU翻倍案例',content:'某游戏春节活动：签到送限定+红包雨+好友召回。DAU从50万涨到120万',notes:'',fav:false,time:Date.now()-864e5*6},
-    {id:16,icon:'💡',cat:'case',title:'首充礼包A/B测试',content:'测3种礼包：6元档/12元档/6+12组合。6元转化率最高',notes:'',fav:false,time:Date.now()-864e5*7},
-    {id:17,icon:'💡',cat:'case',title:'新手签到奖励设计',content:'你正在做的A/B测试！方案A（648金币）vs方案B（限定外观）',notes:'',fav:false,time:Date.now()},
-    {id:18,icon:'🛠️',cat:'tool',title:'A/B测试结果分析器',content:'输入A/B组数据，自动判断显著性',notes:'',fav:false,time:Date.now()},
-    {id:19,icon:'🛠️',cat:'tool',title:'运营健康度检查器',content:'输入5个指标→自动判断「健康/关注/预警」',notes:'',fav:false,time:Date.now()},
-    {id:20,icon:'🛠️',cat:'tool',title:'上线检查清单',content:'活动上线前逐项打勾，全部完成才可上线',notes:'',fav:false,time:Date.now()},
-    {id:21,icon:'🛠️',cat:'tool',title:'文案生成器',content:'输入活动信息→一键生成公告/Push/社媒文案',notes:'',fav:false,time:Date.now()},
-    {id:22,icon:'🛠️',cat:'tool',title:'运营术语卡片机',content:'40个术语翻转卡片，每日复习',notes:'',fav:false,time:Date.now()},
+    // ====== 📖 运营概念 (36条) ======
+    {id:1,icon:'📖',cat:'concept',title:'DAU（日活跃用户）',content:'Daily Active Users，一天内登录游戏的独立用户数量。衡量产品规模的核心指标。健康游戏关注DAU趋势：工作日比周末低10-20%，版本更新日有波动，活动期间有短期高峰。DAU/MAU比值可衡量粘性，0.2-0.5正常。',notes:'',fav:false,time:Date.now()-864e5*1},
+    {id:2,icon:'📖',cat:'concept',title:'MAU（月活跃用户）',content:'Monthly Active Users，一个月内登录游戏的独立用户数量。DAU/MAU叫用户粘性指标（Stickiness），健康游戏20%-40%。低于20%说明用户只是偶尔打开，需要加强日常运营。',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:3,icon:'📖',cat:'concept',title:'留存率',content:'新增用户在第N天后仍在玩的比例。三大黄金留存各有意义：次日留存看「游戏是否好玩」，7日看「核心玩法能否留住人」，30日看「长线运营能力」。提升留存的方法：优化新手引导、每日任务养成习惯、建立社交关系链。',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:4,icon:'📖',cat:'concept',title:'ARPU（每用户平均收入）',content:'Average Revenue Per User。总收入÷总用户数。衡量产品变现效率的关键指标。不同品类差异大：休闲月ARPU $0.5-2，SLG可达$20-100。提高ARPU不一定增加总收入——如果涨价导致付费用户流失，总收入反而下降。',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:5,icon:'📖',cat:'concept',title:'ARPPU（每付费用户平均收入）',content:'Average Revenue Per Paying User。总收入÷付费用户数。ARPU=ARPPU×付费渗透率。提升ARPPU的策略：阶梯式礼包、限时折扣、累充奖励。不是越高越好，太高会压低付费渗透率。',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:6,icon:'📖',cat:'concept',title:'LTV（生命周期价值）',content:'Life Time Value，用户整个生命周期贡献的总收入。决定你能花多少钱买量。健康标准：LTV≥CAC×3。提升LTV要同时提升留存（让用户留更久）和ARPU（让用户付更多）。',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:7,icon:'📖',cat:'concept',title:'CAC（用户获取成本）',content:'Customer Acquisition Cost，获取一个用户的平均成本。总买量费用÷新增用户数。不同渠道差异大：休闲安卓$0.5-2，重度iOS$20+。LTV>CAC才能盈利。降低CAC：优化素材、精准定向、自然量运营。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:8,icon:'📖',cat:'concept',title:'A/B测试',content:'对照组vs实验组，用数据做决策的黄金方法。一次只测一个变量、样本量要够大、覆盖完整使用周期（工作日+周末）。p<0.05才算显著。常见错误：样本不够就下结论、同时测多个变量、提前停止实验。',notes:'',fav:false,time:Date.now()-864e5*1},
+    {id:9,icon:'📖',cat:'concept',title:'RFM模型',content:'最近消费Recency+消费频率Frequency+消费金额Monetary，把用户分成8个层级。从高到低：重要价值→重要发展→重要保持→重要挽留→一般价值→一般发展→一般保持→一般挽留。帮助运营把有限资源投入到最值得的用户身上。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:10,icon:'📖',cat:'concept',title:'AARRR模型（海盗指标）',content:'获取→激活→留存→收入→传播。Sean Ellis提出的增长框架。每个环节核心指标：获取看CPA、激活看完成率、留存看次日/7日/30日留存、收入看ARPU/LTV、传播看K因子。钱应该花在最短板的环节。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:11,icon:'📖',cat:'concept',title:'用户分层',content:'按价值和行为分群做差异化运营。常见维度：按付费（大R/中R/小R/非R）、按活跃度（核心/活跃/流失边缘）、按生命周期（新手/成长/成熟/衰退）、按偏好（PVP/PVE/社交）。大R需要1对1服务，非R需要持续免费内容。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:12,icon:'📖',cat:'concept',title:'付费渗透率',content:'付费用户数÷活跃用户数。休闲2-5%、中度5-10%、重度10-20%。太低说明用户不愿花钱（优化首充礼包），太高可能说明免费用户留存受影响。不是越高越好，20-30%已是天花板。',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:13,icon:'📖',cat:'concept',title:'ROAS（广告支出回报率）',content:'广告收入÷广告支出×100%。7日ROAS要求超过50%，30日ROAS必须>100%。优秀产品30日ROAS 150-200%。ROAS要按渠道分开看：有的ROAS高但量小，有的ROAS低但量大。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:14,icon:'📖',cat:'concept',title:'Battle Pass（战斗通行证）',content:'付费订阅制商业化模式。双路线（免费+付费），奖励有梯度，任务驱动活跃。核心设计：奖励够吸引、任务不过度肝、高性价比（价值感≥定价3-5倍）。行业付费转化率15-20%。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:15,icon:'📖',cat:'concept',title:'活动运营',content:'运营最日常的工作。活动类型：拉新（邀请有礼）、促活（签到/限时副本）、付费（充值返利/限时礼包）、召回（老友回归）、品牌（IP联名/节日）。六步法：定目标→选类型→设奖励→定规则→做预算→上线+复盘。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:16,icon:'📖',cat:'concept',title:'增长黑客（Growth Hacking）',content:'Sean Ellis的数据驱动增长方法论。核心不是怎么花钱买量，而是怎么让产品自带增长。关键是找到Aha Moment——用户第一次感受产品核心价值的时刻。流程：提假设→设计实验→执行→分析数据→标准化或放弃。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:17,icon:'📖',cat:'concept',title:'上瘾模型（Hook Model）',content:'Nir Eyal四步法：触发(外部推送/内部情绪)→行动(降低使用门槛)→可变奖励(每次不同，最核心机制)→投入(用户积累的数据/关系/等级)。抽卡的未知感、开箱的期待感、匹配不同对手的新鲜感，都是留住用户的原因。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:18,icon:'📖',cat:'concept',title:'北极星指标',content:'North Star Metric，指引产品走向成功的核心指标。选择标准：反映用户价值、可操作、可衡量、人人都理解。游戏产品的北极星可以是「日均游戏时长」或「7日留存率」。注意：会随产品阶段变化。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:19,icon:'📖',cat:'concept',title:'NPS/CSAT/CES三大指标',content:'NPS（净推荐值）：问「你有多大可能推荐给朋友？」0-10分。CSAT（满意度）：问「对这次体验满意吗？」1-5分。CES（费力程度）：问「完成这件事容易吗？」越低越好。NPS按月、CSAT按事件、CES按流程。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:20,icon:'📖',cat:'concept',title:'OMTM（唯一关键指标）',content:'One Metric That Matters。验证期关注激活率，增长期关注留存率，变现期关注ARPU，成熟期关注LTV。不要同时追多个指标。先把当前阶段最核心的一个做起来，再转到下一个。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:21,icon:'📖',cat:'concept',title:'ICE评分法',content:'给增长实验排优先级的量化方法。I=Impact(影响1-10分)、C=Confidence(信心1-10)、E=Ease(容易度1-10)。总分=(I+C+E)÷3。建议每周执行3-5个最高分的实验，帮团队聚焦在最值得做的事情上。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:22,icon:'📖',cat:'concept',title:'冷启动与种子用户',content:'产品从零获取第一批用户。冷启动期不关注DAU，核心关注种子用户的留存率、使用时长、功能反馈、传播意愿。30个深度使用的种子用户比300个看一眼就走的用户有价值得多。找种子用户：精准定位、社区邀请、内测资格。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:23,icon:'📖',cat:'concept',title:'买量（用户获取）',content:'通过广告投放获取新用户。国内主要平台：巨量引擎(抖音占60%+)、腾讯广告(30%)。核心指标：CPA、CPI、ROAS、LTV。买量公式：LTV>CPA才能盈利。行业趋势：成本持续上涨，视频素材比图片效果好2-3倍。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:24,icon:'📖',cat:'concept',title:'影响力六大原理',content:'Cialdini六原理：互惠(先给福利再引导付费)、承诺一致(先做小承诺)、社会认同(大家都在玩)、喜好(KOL推荐)、权威(专家背书)、稀缺(限时限量)。组合使用效果翻倍，比如「稀缺+社会认同」一起用。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:25,icon:'📖',cat:'concept',title:'STEPPS疯传六原则',content:'Jonah Berger让内容自发传播的六原则。社交货币(分享有面子)、诱因(日常触发回忆)、情绪(高唤醒情绪易传播)、公共性(使用行为被看到)、实用价值(分享有用信息)、故事(包装成故事传播)。运营活动结合2-3个原则效果最好。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:26,icon:'📖',cat:'concept',title:'系统1/系统2思维',content:'Kahneman双系统：系统1快思考(占90%决策，直觉快速易出错)、系统2慢思考(10%，理性缓慢准确)。游戏运营利用系统1：限时折扣紧迫感、「30秒内下单」首充、抽卡的「再来一次」冲动。需要系统2参与的付费应简化信息。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:27,icon:'📖',cat:'concept',title:'运营四大核心思维',content:'黄有璨《运营之光》：流程化思维(拆解成可执行步骤)、精细化思维(看到每个细分环节的数据)、杠杆化思维(找到撬动更大价值的关键点)、生态化思维(构建良性循环而非单次操作)。运营人的底层能力。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:28,icon:'📖',cat:'concept',title:'五大数据误区',content:'①虚荣指标(下载量/浏览量不能指导行动)②混淆相关和因果(相关不等于因果)③幸存者偏差(只看成功案例)④过早优化(样本不够大就做测试)⑤指标口径不统一(不同团队用不同定义)。避开了数据才真正有用。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:29,icon:'📖',cat:'concept',title:'用户调研四方法',content:'①问卷：成本低速度快，注意问题不能有引导性。②访谈：1对1深度访谈，发现深层原因。③可用性测试：观察用户真实操作，发现使用障碍。④数据分析：让用户用行为说话，不受主观回答偏差影响。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:30,icon:'📖',cat:'concept',title:'私域运营核心',content:'把公域流量沉淀到私域建立长期信任关系。关键原则：内容是维系关系的基础、用户有选择权、持续提供价值而非只发促销。游戏私域运营：新版本预告、福利码发放、攻略内容、用户反馈收集。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:31,icon:'📖',cat:'concept',title:'社群运营四阶段',content:'建群(找到种子用户设定规则)→活跃(话题讨论组织活动)→粘性(建立互助培养核心成员)→变现(提供足够价值后适度转化)。很多社群死在第二三阶段——有能力拉人但无法让用户产生归属感。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:32,icon:'📖',cat:'concept',title:'产品价值公式',content:'俞军公式：产品价值=(新体验-旧体验)-替换成本。替换成本包括学习成本/迁移成本/情感成本/社交成本。游戏替换成本尤其高——用户投入了大量时间金钱社交关系。降低替换成本可大幅提升转化率。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:33,icon:'📖',cat:'concept',title:'内容运营四层次',content:'①数量(保证持续产出)②质量(把控选题和数据反馈)③影响力(通过内容建立产品形象)④生态(UGC+PGC互相促进)。初期先保证数量和质量，稳定后转向影响力和生态。很多产品死在了第一个层次。',notes:'',fav:false,time:Date.now()-864e5*8},
+    {id:34,icon:'📖',cat:'concept',title:'游戏五大付费模式',content:'①F2P+内购(最主流)②买断制(一次付费永久玩)③订阅制(按月/季)④广告变现(看广告拿奖励)⑤混合变现(F2P+广告，最推荐)。2025年趋势：混合变现成为主流，重度游戏也开始加入激励视频。',notes:'',fav:false,time:Date.now()-864e5*8},
+    {id:35,icon:'📖',cat:'concept',title:'活动运营六步法',content:'①定目标(指标要量化，如DAU提升20%)②选类型(匹配目的)③设奖励(阶梯式，感知价值≥成本×3)④定规则(参与条件/时间/限制)⑤做预算(成本+预期收益)⑥上线+复盘(哪些做得好下次复刻，哪些改进)。',notes:'',fav:false,time:Date.now()-864e5*8},
+    {id:36,icon:'📖',cat:'concept',title:'A/B测试执行7步',content:'①定目标②提假设③设变量(一次只变一个)④算样本量(统计功效>80%)⑤分组(50/50随机)⑥运行(覆盖工作日+周末)⑦分析(p<0.05才显著)。常见错误：样本不够就下结论、多变量无法区分、提前停止实验。',notes:'',fav:false,time:Date.now()-864e5*8},
+
+    // ====== 📊 行业数据 (13条) ======
+    {id:101,icon:'📊',cat:'data',title:'各品类次日留存基准',content:'休闲游戏30-40%。中度游戏40-45%。重度游戏（MMO/SLG）45%以上。角色扮演低于40%需排查原因。影响次日留存核心因素：新手引导（5分钟内完成）、首次体验流畅度、注册门槛。微信/QQ登录比手机注册高10-20%。',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:102,icon:'📊',cat:'data',title:'各品类7日留存基准',content:'休闲15-20%。中度20-25%。重度25%以上。7日留存比次日更重要——反映核心玩法能否在一周内持续吸引用户。次日不错但7日很低 = 第一印象好但内容撑不了一周。',notes:'',fav:false,time:Date.now()-864e5*2},
+    {id:103,icon:'📊',cat:'data',title:'各品类30日留存基准',content:'休闲5-10%。中度10-15%。重度15-25%。低于标准说明：内容消耗过快、缺少长线目标、社交生态没建立。提升长线留存要靠持续版本更新、社交关系、长线目标（赛季/成就）。',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:104,icon:'📊',cat:'data',title:'付费渗透率基准',content:'休闲2-5%。中度5-10%。重度10-20%。MMO/SLG可到15-25%。太低优化首充礼包（6元档转化率最高）。太高可能免费用户体验不好。20-30%已是天花板。',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:105,icon:'📊',cat:'data',title:'各品类月ARPU参考',content:'休闲$0.5-2。中度$2-10。重度$10-50+。SLG$20-100+。品类决定ARPU天花板。建议先提升付费渗透率（让更多人付），再提升ARPU（让付费的人付更多）。',notes:'',fav:false,time:Date.now()-864e5*3},
+    {id:106,icon:'📊',cat:'data',title:'买量CPA成本参考',content:'国内iOS：休闲$1-3/中度$3-8/重度$8-20+。国内安卓：休闲$0.5-2/中度$2-5/重度$5-15+。海外欧美：休闲$2-5/中度$5-15/重度$15-40+。暑期春节成本最高。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:107,icon:'📊',cat:'data',title:'LTV/CAC健康比值',content:'LTV/CAC≥3为健康，1-2需优化，超过5可加大买量。核心公式：LTV=平均生命周期（月）×月ARPU。例如玩6个月×月$5=$30，CPA=$10，LTV/CAC=3，达标。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:108,icon:'📊',cat:'data',title:'活动参与率基准',content:'日常活动30-50%。周末40-60%。节日大活动50-80%。低于20%排查原因：入口太深、奖励不够吸引、规则太复杂、宣传不到位。优化：弹窗提醒、推送预告、任务引导、阶梯奖励。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:109,icon:'📊',cat:'data',title:'手游月流失率',content:'休闲25-40%。中度15-25%。重度5-15%。超过50%紧急排查。新游前3个月流失最高（可能60%+），稳定期后下降。上升原因：版本BUG、内容耗尽、社交断裂、竞品上线。',notes:'',fav:false,time:Date.now()-864e5*4},
+    {id:110,icon:'📊',cat:'data',title:'礼包购买转化率',content:'弹窗礼包3-8%。首页推荐1-3%。限时折扣5-12%。新人专享15-30%。价格每增加一倍转化率降40-60%。最优：低门槛（6-12元）+高感知价值（≥定价3倍）+限时限量。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:111,icon:'📊',cat:'data',title:'首充最优定价',content:'行业A/B测试：6元档转化率最高(15-30%)，12元档性价比最高，6+12组合档总收益最高(总收入提升40%)。首充礼包价值感应为定价3倍以上。6元礼包感知价值应在18-30元。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:112,icon:'📊',cat:'data',title:'全球游戏市场规模',content:'2025年全球游戏市场约$2000亿美元。中国市场约$450亿（全球最大）。移动游戏占55%。中国出海收入持续增长，预计破$200亿。最快增长出海品类：SLG、休闲、二次元。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:113,icon:'📊',cat:'data',title:'ROAS健康值',content:'7日ROAS：休闲>20%、中度>30%、重度>40%。30日ROAS必须>100%才盈利，优秀产品可达150-200%。注意：只看ROAS不看量级是片面的。',notes:'',fav:false,time:Date.now()-864e5*4},
+
+    // ====== 💡 经典案例 (9条) ======
+    {id:201,icon:'💡',cat:'case',title:'原神全球同步运营',content:'米哈游《原神》42天一个大版本全球同步更新。角色UP卡池交替（新角色+复刻老角色），维持持续付费动力。成功关键：全球版本同步保证公平、结合地区文化的节日活动、高质量IP联名制造社交话题。全球累计收入超$80亿。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:202,icon:'💡',cat:'case',title:'王者荣耀10年运营',content:'腾讯《王者荣耀》持续运营10年+，月活超1亿。核心策略：每周平衡调整、赛季更新（一年4季）、皮肤商业化（6-2888元）、KPL电竞赛事年观赛量超200亿。运营挑战：平衡调整直接影响体验，社区运营非常重要。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:203,icon:'💡',cat:'case',title:'蛋仔派对UGC生态',content:'网易《蛋仔派对》通过UGC编辑器构建内容生态。用户自制地图超1亿张，月活峰值破亿。核心：易用的编辑器、优质地图官方推荐、创作者比赛。UGC让游戏内容无限扩展，极大延长生命周期。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:204,icon:'💡',cat:'case',title:'春节DAU翻倍案例',content:'某游戏春节活动：签到送限定+红包雨+好友召回+年兽副本。DAU从50万涨到120万（+140%），活动参与率85%，付费转化率+60%。成功关键：限时稀缺感+社交裂变+节日情感共鸣。春节贡献全年20-30%收入。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:205,icon:'💡',cat:'case',title:'首充A/B测试优化',content:'某中度游戏测3种首充礼包：6元/12元/6+12组合。结果：6元转化率最高(25%)但ARPU低，组合档转化率15%但总收益最高（比纯6元+40%）。结论：看收入不能只看转化率，要看总LTV。最终采用组合档。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:206,icon:'💡',cat:'case',title:'流失用户召回案例',content:'某游戏针对30天未登录用户做召回。推送打开率32%（行业平均15-20%），召回率12%，召回用户7日留存45%，15%重新付费。关键：回归奖励有吸引力但不过分，避免正常用户故意流失。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:207,icon:'💡',cat:'case',title:'Battle Pass成败对比',content:'成功版：双路线+每日任务+梯度强烈+冲刺机制，转化率18%。失败版：奖励平庸+任务繁琐+性价比低，转化率4%。核心教训：战令要让人每天上来领奖励→想继续升级→明天再来。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:208,icon:'💡',cat:'case',title:'合服失败教训',content:'某SLG没通知直接合服→老服高战碾压→重名公解散→排行乱→用户抗议→月流失从15%飙升到35%，付费收入降50%，花了3个月恢复。正确做法：提前14天公告+改名卡+排行榜合并+势力平衡+差异化补偿。',notes:'',fav:false,time:Date.now()-864e5*7},
+    {id:209,icon:'💡',cat:'case',title:'社交裂变增长',content:'微信小游戏：分享得体力+助力砍价+组队领奖。数据：单次分享平均带来3-8个新用户。K因子>1可自增长（不用买量）。关键：有奖励但不强迫+奖励有价值不破坏平衡+分享流程极简。',notes:'',fav:false,time:Date.now()-864e5*7},
+
+    // ====== 🛠️ 效率工具 (7条) ======
+    {id:301,icon:'🛠️',cat:'tool',title:'A/B测试结果分析器',content:'输入A/B组数据（点击数和转化数），自动判断是否统计显著。已输出到桌面。使用：测试方案前算好样本量，活动结束后输入数据看差异是否显著。',notes:'',fav:false,time:Date.now()},
+    {id:302,icon:'🛠️',cat:'tool',title:'运营健康度检查器',content:'输入5个核心指标（留存/付费/LTV/流失/活跃），自动判断「健康/关注/预警」。帮助运营快速判断产品是否需要干预。建议每日早会过一遍。',notes:'',fav:false,time:Date.now()},
+    {id:303,icon:'🛠️',cat:'tool',title:'活动上线检查清单',content:'上线前逐项打勾：内容配置、定价测试、文案确认（公告/Push/弹窗）、埋点确认、应急预案。全部打勾完成才可上线。减少上线事故的最好方法。',notes:'',fav:false,time:Date.now()},
+    {id:304,icon:'🛠️',cat:'tool',title:'Firecrawl网页采集器',content:'自动爬取游研社/游戏大观/Indienova等游戏行业网站。可配置定时采集和关键词过滤。用于竞品分析和行业动态监控。比人工浏览效率高10倍。',notes:'',fav:false,time:Date.now()},
+    {id:305,icon:'🛠️',cat:'tool',title:'竞品日报系统',content:'每日自动生成竞品分析日报：A报-新闻AI分析+ B报-排行榜监控(Steam/TapTap/应用宝)。推送至飞书。让运营每天到公司第一件事就是看竞品发生了什么。',notes:'',fav:false,time:Date.now()},
+    {id:306,icon:'🛠️',cat:'tool',title:'运营术语卡片机',content:'40+运营术语翻转卡片，每日随机复习。支持分类筛选和进度追踪。适合新人快速熟悉行业术语和老手定期回顾。记住术语=看定义→想例子→用出去。',notes:'',fav:false,time:Date.now()},
+    {id:307,icon:'🛠️',cat:'tool',title:'章鱼爬爬AI助手',content:'你正在对话的AI助手！支持运营问答、数据分析、文档清洗、竞品监控、桌面整理等全方位服务。数据存在浏览器本地，随时可用。',notes:'',fav:false,time:Date.now()},
+
+    // ====== 🎮 游戏运营 (12条) ======
+    {id:401,icon:'🎮',cat:'game',title:'版本运营最佳节奏',content:'大版本每4-6周一次（新角色/系统/玩法）。小版本每1-2周一次（活动/平衡调整）。热更新随时（紧急修复）。流程：开发→测试服1-2周→公告→分批开放→监控指标→收集反馈→一周后复盘。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:402,icon:'🎮',cat:'game',title:'游戏经济系统设计',content:'四个核心环节：产出（任务/活动→金币/材料）→消耗（强化/抽卡→花出去）→回收（系统手续费→防通胀）→交易（需谨慎防工作室）。崩溃征兆：货币溢出、道具贬值、黑市猖獗。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:403,icon:'🎮',cat:'game',title:'社交设计三层',content:'弱社交（排行榜/点赞/围观）→引流。中间态（公会/联盟/师徒）→沉淀。强社交（组队/结婚）→留住。理想状态：弱引→中沉→强留。社交可提升次日留存5-15%。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:404,icon:'🎮',cat:'game',title:'用户生命周期管理',content:'D0-3新手期：简化引导/首充/新手保护。D4-14探索期：内容推荐/公会引导/社交绑定。D15-30成长期：每日任务/周常/累计充值。D31-90成熟期：新版本/赛季/荣誉体系。D90+衰退期：通过推送和活动召回。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:405,icon:'🎮',cat:'game',title:'每日数据看板8组',content:'①DAU/新增/MAU ②留存(次日/7日/30日)③付费渗透率/ARPU/ARPPU ④活动参与率/ARPU ⑤版本渗透率 ⑥CPA/ROAS/LTV/CAC ⑦评分/差评率。早上第一件事扫一遍数据趋势，趋势比绝对值重要。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:406,icon:'🎮',cat:'game',title:'合服最佳实践',content:'提前7-14天公告→处理重名(免费改名卡)→排行榜合并→势力平衡(防碾压)→差异化补偿(老服更多)。反面：不通知直接合→流失率15%→35%，收入降50%花了3个月恢复。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:407,icon:'🎮',cat:'game',title:'广告变现三种形式',content:'激励视频(用户主动看广告领奖励，eCPM$10-30，最推荐)插屏(关卡切换弹出，$5-15)Banner(底部横幅，$1-5)。原则：不影响核心体验+用户有选择+控制频率。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:408,icon:'🎮',cat:'game',title:'手游发行渠道生态',content:'国内安卓：硬核联盟(华为/小米/OPPO/VIVO，60%分发量，分成50%)TapTap(零分成社区强)B站(二次元核心)。iOS：App Store(30%分成)。海外安卓：Google Play(25-30%)。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:409,icon:'🎮',cat:'game',title:'游戏UI/UX要点',content:'运营关注的关键指标：新手引导完成率、付费入口点击率、活动页面转化率、推送打开率、加载时间(每减1秒留存增5-10%)。定期看用户行为数据优化界面。很多时候不是运营不够努力，是用户找不到入口。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:410,icon:'🎮',cat:'game',title:'抽卡/保底机制',content:'硬保底（N次必出）和软保底（概率递增）。关键指标：抽卡转化率、平均抽卡次数、单抽收益。设计好不好直接影响收入。保底的作用：给用户一个「最差预期」，降低挫败感。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:411,icon:'🎮',cat:'game',title:'手游生命周期曲线',content:'上线爆发期(1-3月DAU峰值)→稳定期(3-12月)→衰退期(12月+)。不同类型差异大：SLG/MMO最长(3-5年)，卡牌/RPG中等(1-3年)，休闲最短(3-6月)。运营目标是尽可能延长稳定期。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:412,icon:'🎮',cat:'game',title:'游戏行业关键运营节点',content:'春节(2月，DAU最高，全年20-30%收入)→暑期(7-8月，新增最多)→国庆(长假，适合大型活动)→圣诞元旦(12月付费高峰)。Q4是全年收入最高季度。提前2-3个月筹备关键节点。',notes:'',fav:false,time:Date.now()-864e5*5},
+
+    // ====== 📈 产品运营 (10条) ======
+    {id:501,icon:'📈',cat:'product',title:'产品价值公式',content:'俞军：产品价值=(新体验-旧体验)-替换成本。替换成本：学习成本/迁移成本/情感成本/社交成本。游戏替换成本尤其高。降低替换成本可大幅提升拉新转化率。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:502,icon:'📈',cat:'product',title:'用户运营生命周期',content:'引入期(新手引导完成率)→成长期(7日留存+功能渗透率)→成熟期(付费渗透率+ARPU)→休眠期(召回推送)→流失期(分析原因优化产品)。金字塔结构但价值倒金字塔。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:503,icon:'📈',cat:'product',title:'OMTM原则',content:'One Metric That Matters。验证期看激活率→增长期看留存→变现期看ARPU→成熟期看LTV。不要同时追多个指标。日活下滑的游戏先关注留存，不是ARPU。',notes:'',fav:false,time:Date.now()-864e5*5},
+    {id:504,icon:'📈',cat:'product',title:'五大数据误区',content:'①虚荣指标(不能指导行动)②混淆相关和因果③幸存者偏差④过早优化(<1000样本做测试)⑤指标口径不统一。避开了这五个，数据分析才有意义。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:505,icon:'📈',cat:'product',title:'用户调研四方法',content:'①问卷(快速大量)②用户访谈(深度1对1)③可用性测试(观察真实操作)④数据分析(让行为说话)。组合使用效果最好。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:506,icon:'📈',cat:'product',title:'私域运营核心',content:'公域流量沉淀到私域，建立长期信任关系。关键：内容价值>广告、用户有选择权、持续提供价值。游戏私域：版本预告/福利码/攻略/反馈收集。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:507,icon:'📈',cat:'product',title:'社群运营四阶段',content:'建群(种子用户+规则)→活跃(话题+活动)→粘性(互助+核心成员)→变现(适度转化)。很多社群死在「能拉人但留不住人」的阶段。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:508,icon:'📈',cat:'product',title:'NPS/CSAT/CES三大指标',content:'NPS净推荐值(按月)、CSAT满意度(按事件)、CES费力程度(按流程)。组合使用全面了解用户满意度。游戏NPS>50为优秀。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:509,icon:'📈',cat:'product',title:'ICE评分法排优先级',content:'I=Impact影响+C=Confidence信心+E=Ease容易度。各1-10分，总分=(I+C+E)÷3。帮团队聚焦在最值得做的事情上。建议每周3-5个实验。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:510,icon:'📈',cat:'product',title:'内容运营四层次',content:'①数量(持续产出)②质量(选题+数据)③影响力(品牌形象)④生态(UGC+PGC循环)。初期保数量质量，稳定后转影响力和生态。',notes:'',fav:false,time:Date.now()-864e5*6},
+
+    // ====== 🌐 行业知识 (8条) ======
+    {id:601,icon:'🌐',cat:'industry',title:'游戏产业链全景',content:'研发(CP)→发行(运营推广)→渠道(分发)→用户。收入分成通常研发:发行:渠道=3:3:4至5:2:3。头部研发可自主发行。运营在发行端，是研发和用户之间的桥梁。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:602,icon:'🌐',cat:'industry',title:'游戏版号制度',content:'上线商业游戏必须获版号，申请周期6-18个月。无版号可免费测试但不能收费。2023年后每年发放约1000-1500个（比2017少50%+）。没有版号的中小团队可先出海再回国。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:603,icon:'🌐',cat:'industry',title:'游戏出海热门地区',content:'东南亚(用户量大ARPU低，适合休闲/中度)。日韩(ARPU高门槛高，适合二次元/重度)。北美欧洲(收入高竞争激烈，适合SLG/中度)。新兴市场(拉美中东增长快)。出海收入约$200亿+。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:604,icon:'🌐',cat:'industry',title:'买量行业生态',content:'巨量引擎（抖音占60%+）腾讯广告（30%）快手/B站。成本持续上涨（比2020涨3-5倍）。正从纯买量转向品牌+内容+IP。运营应对：优化素材、提升LTV、拓展自然量。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:605,icon:'🌐',cat:'industry',title:'游戏行业岗位体系',content:'研发：策划(系统/数值/关卡/文案)+程序(客户端/服务器)+美术(原画/3D/特效/UI)。发行：运营(版本/活动/社区/数据)+市场(买量/品牌/商务/KOL)。运营需要理解研发逻辑+用户心理。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:606,icon:'🌐',cat:'industry',title:'游戏监管政策要点',content:'三大红线：未成年人防沉迷(实名/限1.5h/晚10后禁/限充值)抽卡概率公示(概率/保底/内容)内容合规(不得违规/暴力)。违反可能下架、罚款、吊销资质。合规是运营基本功。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:607,icon:'🌐',cat:'industry',title:'手游发行节奏',content:'上线前：预约(积累首批用户)+预下载。上线：爆发期(3-7天冲榜)+稳定期(数据验证+买量放量)。运营期：版本节奏+活动节奏+买量节奏三条线并行。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:608,icon:'🌐',cat:'industry',title:'2025游戏行业趋势',content:'AIGC改变开发流程、混合变现成主流、跨平台加速、游戏+社交融合、小程序游戏快速增长、AI NPC和智能对话引入游戏。',notes:'',fav:false,time:Date.now()-864e5*6},
+
+    // ====== 📚 推荐书单 (10条) ======
+    {id:701,icon:'📚',cat:'book',title:'《游戏运营：高手进阶之路》',content:'饭大官人。国内游戏运营最经典著作。活动/版本/社区/数据分析四大模块。从入行到进阶的系统方法论。适合0-3年游戏运营。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:702,icon:'📚',cat:'book',title:'《运营之光》',content:'黄有璨。互联网运营通用方法论。流程化/精细化/杠杆化/生态化四大思维是运营底层能力。适合产品和平台运营入门。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:703,icon:'📚',cat:'book',title:'《增长黑客》',content:'Sean Ellis。AARRR模型的出处。核心：先找Aha Moment再设计增长策略。适合所有产品和运营。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:704,icon:'📚',cat:'book',title:'《精益数据分析》',content:'Alistair Croll。找到OMTM（第一关键指标）而不是被虚荣指标迷惑。数据驱动决策必读。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:705,icon:'📚',cat:'book',title:'《上瘾》',content:'Nir Eyal。触发→行动→可变奖励→投入。解释了为什么产品让人停不下来。游戏从业者理解用户行为的必读书。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:706,icon:'📚',cat:'book',title:'《疯传》',content:'Jonah Berger。STEPPS六原则：社交货币/诱因/情绪/公共性/实用价值/故事。适合做活动传播和内容营销。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:707,icon:'📚',cat:'book',title:'《影响力》',content:'Robert Cialdini。互惠/承诺一致/社会认同/喜好/权威/稀缺。运营活动的底层理论，每次设计活动前翻一翻。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:708,icon:'📚',cat:'book',title:'《思考，快与慢》',content:'Daniel Kahneman。系统1(快思考占90%决策)和系统2(慢思考)。理解用户不理性的决策方式，做更好的运营设计。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:709,icon:'📚',cat:'book',title:'《行为设计学》',content:'Chip Heath。小改变→放大的→容易做→有动力。适合做用户行为和运营流程设计。',notes:'',fav:false,time:Date.now()-864e5*6},
+    {id:710,icon:'📚',cat:'book',title:'《俞军产品方法论》',content:'产品价值=(新体验-旧体验)-替换成本。交易模型+用户模型是产品核心能力。产品和运营一起读效果更好。',notes:'',fav:false,time:Date.now()-864e5*6},
   ];
   save();
 }
@@ -309,7 +411,7 @@ function render(){
 }
 
 function renderOverview(area){
-  const cats = {concept:[],data:[],case:[],tool:[],diary:[]};
+  const cats = {concept:[],data:[],case:[],tool:[],game:[],product:[],industry:[],book:[],slang:[],diary:[]};
   library.forEach(i=>{if(cats[i.cat])cats[i.cat].push(i);});
   let html='';
   for(const[key,items]of Object.entries(cats)){
