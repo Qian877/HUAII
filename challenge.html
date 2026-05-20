@@ -1,0 +1,758 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐙 槐的挑战池</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(135deg, #fdf6f0 0%, #f0f7f0 100%); color: #3d3a35; line-height: 1.6; min-height: 100vh; padding: 24px; }
+    .container { max-width: 720px; margin: 0 auto; }
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .header h1 { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #e89f9f, #9fc9a0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .date-badge { font-size: 13px; color: #9a9a8a; background: #f0ebe4; padding: 3px 14px; border-radius: 20px; font-weight: 500; }
+    .deco { margin-left: auto; display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dpink { background: #f0c0c0; }
+    .dgreen { background: #b8d9b8; }
+    .dpeach { background: #f5d6c6; }
+    .tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.7); border-radius: 14px; padding: 4px; margin-bottom: 20px; backdrop-filter: blur(8px); }
+    .tab-btn { flex: 1; border: none; background: transparent; padding: 10px 16px; border-radius: 11px; font-size: 15px; font-weight: 600; color: #9a9a8a; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .tab-btn:hover { color: #3d3a35; }
+    .tab-btn.active { background: #fff; color: #d4787a; box-shadow: 0 1px 6px rgba(212,120,122,0.12); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .section-title { font-size: 14px; font-weight: 600; color: #9a9a8a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .progress-bar { flex: 1; height: 6px; background: #ede9e2; border-radius: 6px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f0c0c0, #d4a7a7, #b8d9b8); transition: width 0.5s ease; width: 0%; }
+    .progress-text { font-size: 12px; color: #9a9a8a; white-space: nowrap; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .refresh-btn, .quiz-refresh-btn, .view-all-btn, .fav-btn { border: 1.5px solid #d4cdc2; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #9a9a8a; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .refresh-btn:hover, .quiz-refresh-btn:hover, .view-all-btn:hover, .fav-btn:hover { border-color: #d4a7a7; color: #d4787a; transform: scale(1.03); }
+    .fav-btn.active { border-color: #f5b342; color: #f5b342; }
+    /* ===== Ripple Effect ===== */
+    .ripple-effect { position: absolute; border-radius: 50%; background: rgba(212,120,122,0.2); width: 20px; height: 20px; pointer-events: none; animation: rippleAnim 0.5s ease-out; }
+    @keyframes rippleAnim { from { transform: scale(0.5); opacity: 0.6; } to { transform: scale(4); opacity: 0; } }
+    /* ===== Confetti on complete ===== */
+    .confetti-piece { position: fixed; width: 8px; height: 8px; border-radius: 2px; pointer-events: none; z-index: 300; animation: confettiFall 0.8s ease-out forwards; }
+    @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(80px) rotate(360deg); opacity: 0; } }
+    /* ===== Task Cards ===== */
+    .today-card { background: #fff; border-radius: 16px; padding: 12px 18px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; border-left: 4px solid #ddd; }
+    .today-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateX(2px); }
+    .today-card.type-make { border-left-color: #d4a7a7; } .today-card.type-analyze { border-left-color: #7baac4; } .today-card.type-build { border-left-color: #a7c4a7; } .today-card.type-play { border-left-color: #c4a7d4; } .today-card.type-design { border-left-color: #e89f9f; }
+    .today-card.done { opacity: 0.55; }
+    .today-card.done .today-title { text-decoration: line-through; color: #9a9a8a; }
+    /* Checkbox */
+    .task-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #d4cdc2; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; transition: all 0.25s; cursor: pointer; position: relative; }
+    .task-check:hover { border-color: #9fc9a0; transform: scale(1.1); }
+    .task-check.checked { background: #9fc9a0; border-color: #9fc9a0; color: #fff; animation: checkPop 0.3s ease; }
+    @keyframes checkPop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+    .today-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .today-icon.make-icon { background: #fce4ec; } .today-icon.analyze-icon { background: #e3f0ff; } .today-icon.build-icon { background: #e8f5e9; } .today-icon.play-icon { background: #f3e5f5; } .today-icon.design-icon { background: #fce4ec; }
+    .today-body { flex: 1; min-width: 0; }
+    .today-title { font-size: 15px; font-weight: 700; color: #3d3a35; transition: color 0.3s; }
+    .today-meta { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
+    .today-tag { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; }
+    .today-tag.t-make { background: #fce4ec; color: #c46a6a; } .today-tag.t-analyze { background: #e3f0ff; color: #4a7a9c; } .today-tag.t-build { background: #e8f5e9; color: #4a8c5c; } .today-tag.t-play { background: #f3e5f5; color: #7b5ea7; } .today-tag.t-design { background: #fce4ec; color: #c46a6a; }
+    .today-tools { font-size: 11px; color: #b8b0a2; margin-top: 2px; }
+    .today-arrow { font-size: 16px; color: #d4cdc2; flex-shrink: 0; }
+    .back-btn { display: none; border: none; background: #f0ebe4; padding: 8px 16px; border-radius: 24px; font-size: 13px; font-weight: 600; color: #9a9a8a; cursor: pointer; margin-bottom: 16px; position: relative; overflow: hidden; }
+    .back-btn:hover { background: #e5ddd0; color: #3d3a35; }
+    .detail-card { background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .detail-title-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+    .detail-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .detail-icon.make-icon { background: #fce4ec; } .detail-icon.analyze-icon { background: #e3f0ff; } .detail-icon.build-icon { background: #e8f5e9; } .detail-icon.play-icon { background: #f3e5f5; } .detail-icon.design-icon { background: #fce4ec; }
+    .detail-title-text { font-size: 18px; font-weight: 700; color: #3d3a35; }
+    .detail-desc { font-size: 14px; color: #5a5548; line-height: 1.7; margin-bottom: 16px; }
+    .detail-desc strong { color: #d4787a; }
+    .detail-steps { background: #faf8f5; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
+    .detail-steps summary { font-size: 13px; font-weight: 600; color: #9a9a8a; cursor: pointer; }
+    .detail-steps summary:hover { color: #3d3a35; }
+    .detail-steps ol { margin-top: 10px; padding-left: 20px; font-size: 13px; color: #5a5548; line-height: 1.8; }
+    .detail-tools { background: #f0f7f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+    .detail-tools-title { font-size: 12px; font-weight: 600; color: #4a8c5c; margin-bottom: 6px; }
+    .detail-tools p { font-size: 13px; color: #5a5548; line-height: 1.6; }
+    .tool-chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; background: #fff; border: 1px solid #d4cdc2; margin: 2px 3px; color: #5a5548; }
+    .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-help, .btn-done { border: none; font-size: 13px; font-weight: 600; padding: 10px 22px; border-radius: 24px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .btn-help { background: linear-gradient(135deg, #f0c0c0, #d4a7a7); color: #fff; }
+    .btn-help:hover { transform: scale(1.04); box-shadow: 0 2px 12px rgba(212,120,122,0.3); }
+    .btn-done { border: 1.5px solid #d4cdc2; background: transparent; color: #9a9a8a; }
+    .btn-done.completed { background: #e8f5e9; border-color: #9fc9a0; color: #4a8c5c; }
+    .btn-done:hover { border-color: #9fc9a0; color: #4a8c5c; }
+    .detail-result { margin-top: 12px; padding: 12px 16px; background: #f0f7f0; border-radius: 10px; font-size: 13px; color: #4a8c5c; display: none; }
+    .detail-result.show { display: block; }
+    .completed-section { margin-top: 24px; }
+    .completed-mini { background: #fff; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; opacity: 0.6; font-size: 13px; }
+    .completed-mini .check-box { width: 20px; height: 20px; border-radius: 50%; background: #9fc9a0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; }
+    /* ===== Quiz ===== */
+    .quiz-card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; border-left: 4px solid #d4a7a7; position: relative; }
+    .quiz-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .quiz-card.data-q { border-left-color: #7baac4; } .quiz-card.strategy-q { border-left-color: #7bc49b; }
+    .quiz-card.done { opacity: 0.75; }
+    .quiz-q { font-size: 15px; font-weight: 600; color: #3d3a35; display: flex; gap: 10px; align-items: flex-start; padding-right: 30px; }
+    .quiz-badge { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+    .quiz-badge.db { background: #7baac4; } .quiz-badge.sb { background: #7bc49b; }
+    .quiz-tag-sm { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; margin: 8px 0 0 36px; }
+    .quiz-tag-sm.qt-data { background: #e3f0ff; color: #4a7a9c; } .quiz-tag-sm.qt-strategy { background: #e6f7e6; color: #4a8c5c; }
+    .quiz-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.3s ease; opacity: 0; margin-top: 0; }
+    .quiz-card.expanded .quiz-answer { max-height: 600px; opacity: 1; margin-top: 12px; }
+    .quiz-answer-inner { background: #faf8f5; border-radius: 10px; padding: 14px 16px; font-size: 14px; color: #4a473f; line-height: 1.7; margin-left: 36px; }
+    .quiz-answer-inner strong { color: #d4787a; }
+    .quiz-btns { display: flex; gap: 8px; margin: 10px 0 0 36px; }
+.quiz-view-btn { border: 1.5px solid #7baac4; background: #fff; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #4a7a9c; cursor: pointer; transition: all 0.2s; }
+.quiz-view-btn:hover { background: #e3f0ff; transform: scale(1.05); }
+.quiz-done-btn { border: 1.5px solid #9fc9a0; background: #fff; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #4a8c5c; cursor: pointer; transition: all 0.2s; }
+.quiz-done-btn:hover { background: #e8f5e9; transform: scale(1.05); }
+.quiz-done-btn:disabled { opacity: 0.6; cursor: default; }
+
+.quiz-done-btn { display: block; margin: 10px auto 0 auto; border: 1.5px solid #9fc9a0; background: #fff; padding: 6px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #4a8c5c; cursor: pointer; transition: all 0.2s; }
+.quiz-done-btn:hover { background: #e8f5e9; transform: scale(1.05); }
+    /* Bookmark star */
+    .bookmark-star { position: absolute; top: 14px; right: 14px; font-size: 18px; cursor: pointer; transition: all 0.25s; z-index: 2; color: #e0d8cc; user-select: none; }
+    .bookmark-star:hover { transform: scale(1.2); }
+    .bookmark-star.active { color: #f5b342; animation: starPop 0.3s ease; }
+    @keyframes starPop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+    .knowledge-section { margin-top: 24px; padding-top: 16px; border-top: 2px dashed #e0d8cc; }
+    .knowledge-card { background: linear-gradient(135deg, #fdf6f0, #f0f7f0); border-radius: 14px; padding: 16px 18px; margin-bottom: 10px; }
+    .k-term { font-size: 14px; font-weight: 700; color: #d4787a; margin-bottom: 6px; }
+    .k-body { font-size: 14px; color: #4a473f; line-height: 1.7; }
+.k-example { font-size: 13px; color: #5a5548; line-height: 1.7; margin-top: 10px; padding: 10px 12px; background: #fff; border-radius: 10px; border-left: 3px solid #d4a7a7; }
+    .tip-card { background: #fff; border-radius: 14px; padding: 14px 18px; margin-top: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .tip-body { font-size: 14px; color: #4a473f; line-height: 1.6; }
+    .checkin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 16px 18px; background: #fff; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.checkin-streak { font-size: 18px; font-weight: 700; color: #d4787a; }
+.checkin-total { font-size: 13px; color: #9a9a8a; }
+.checkin-stamp-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.checkin-btn { border: 3px dashed #d4787a; background: #fff; color: #d4787a; padding: 4px 8px; border-radius: 10px; font-size: 28px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; line-height: 1; min-width: 56px; min-height: 56px; display: flex; align-items: center; justify-content: center; }
+.checkin-btn:hover { transform: scale(1.08); box-shadow: 0 4px 20px rgba(212,120,122,0.25); border-style: solid; }
+.checkin-btn:disabled { cursor: default; opacity: 0.7; }
+.checkin-btn.done { border: 3px solid #d4a7a7; background: #fdf6f0; opacity: 0.75; font-size: 28px; min-width: 56px; min-height: 56px; padding: 4px 8px; }
+.checkin-btn.done:hover { transform: none; box-shadow: none; }
+.checkin-stamp-label { font-size: 11px; font-weight: 600; color: #d4787a; }
+.checkin-stamp-label.done { color: #9a9a8a; }
+.stamp-anim { position: fixed; pointer-events: none; z-index: 1000; font-size: 120px; animation: stampFall 0.6s ease-out forwards; }
+@keyframes stampFall { 0% { transform: scale(3) translateY(-60px); opacity: 0; } 30% { transform: scale(1.2) translateY(10px); opacity: 1; } 50% { transform: scale(0.9) translateY(0); opacity: 1; } 70% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.6; } }
+.stamp-ring { position: fixed; pointer-events: none; z-index: 999; border: 6px dashed #d4787a; border-radius: 50%; animation: ringExpand 0.5s ease-out forwards; }
+@keyframes ringExpand { 0% { width: 20px; height: 20px; opacity: 0.6; } 100% { width: 200px; height: 200px; opacity: 0; } }
+.checkin-today { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #fdf6f0, #f0f7f0); border-radius: 16px; padding: 18px 20px; margin-bottom: 16px; }
+.checkin-status { font-size: 16px; font-weight: 600; color: #5a5548; }
+.checkin-status.done { color: #4a8c5c; }
+.checkin-calendar { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+.cal-day { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; font-weight: 600; color: #b8b0a2; background: #faf8f5; }
+.cal-day.done { background: #fdf6f0; color: #d4787a; font-size: 18px; line-height: 1; }
+.cal-day.today { border: 2px solid #d4a7a7; color: #d4787a; font-weight: 700; }
+.cal-day.empty { background: transparent; }
+.cal-weekday { font-size: 11px; color: #c4bcae; text-align: center; padding: 4px 0; font-weight: 600; }
+.checkin-history { background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.checkin-record { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0ebe4; font-size: 13px; color: #5a5548; }
+.checkin-record:last-child { border-bottom: none; }
+.checkin-record .date { color: #9a9a8a; }
+.checkin-record .badge { color: #4a8c5c; font-weight: 600; }
+.footer { text-align: center; margin-top: 36px; font-size: 12px; color: #c4bcae; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .today-card, .quiz-card, .knowledge-card, .detail-card { animation: fadeUp 0.4s ease both; }
+    .today-card:nth-child(2) { animation-delay: 0.06s; }
+    .today-card:nth-child(3) { animation-delay: 0.12s; }
+    @media (max-width: 640px) {
+  body { padding: 16px; }
+  .container { max-width: 100%; }
+  .header h1 { font-size: 20px; }
+  .header { flex-wrap: wrap; gap: 8px; }
+  .date-badge { font-size: 12px; padding: 2px 12px; }
+  .deco { margin-left: 0; }
+  
+  /* Tabs */
+  .tabs { gap: 2px; padding: 3px; }
+  .tab-btn { padding: 8px 10px; font-size: 13px; }
+  
+  /* Task cards */
+  .today-card { padding: 10px 12px; gap: 8px; }
+  .today-title { font-size: 14px; }
+  .today-icon { width: 30px; height: 30px; font-size: 15px; }
+  .task-check { width: 20px; height: 20px; flex-shrink: 0; }
+  .today-meta { flex-wrap: wrap; }
+  .today-tag { font-size: 10px; padding: 1px 8px; }
+  .today-tools { font-size: 10px; }
+  
+  /* Progress */
+  .progress-row { flex-wrap: wrap; gap: 6px; }
+  .progress-text { font-size: 11px; }
+  .top-bar { flex-wrap: wrap; gap: 6px; }
+  .refresh-btn, .quiz-refresh-btn, .view-all-btn, .fav-btn { font-size: 12px; padding: 5px 12px; }
+  
+  /* Detail view */
+  .detail-card { padding: 16px; }
+  .detail-title-text { font-size: 16px; }
+  .detail-desc { font-size: 13px; }
+  .detail-icon { width: 36px; height: 36px; font-size: 18px; }
+  .detail-steps { padding: 12px 14px; }
+  .detail-steps ol { font-size: 12px; padding-left: 16px; }
+  .detail-tools { padding: 12px 14px; }
+  .detail-tools p { font-size: 12px; }
+  .btn-help, .btn-done { font-size: 12px; padding: 8px 18px; }
+  
+  /* Quiz cards */
+  .quiz-card { padding: 14px; }
+  .quiz-q { font-size: 14px; padding-right: 24px; }
+  .quiz-answer-inner { font-size: 13px; padding: 10px 12px; margin-left: 0; }
+  .quiz-badge { width: 22px; height: 22px; font-size: 10px; }
+  .quiz-tag-sm { margin-left: 32px; font-size: 10px; }
+  .quiz-btns { flex-direction: column; gap: 6px; margin-left: 0; }
+  .quiz-view-btn, .quiz-done-btn { font-size: 12px; padding: 8px 14px; width: 100%; text-align: center; }
+  .bookmark-star { top: 10px; right: 10px; font-size: 16px; }
+  
+  /* Check-in */
+  .checkin-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+  .checkin-streak { font-size: 16px; }
+  .checkin-total { font-size: 12px; }
+  .checkin-btn { min-width: 44px; min-height: 44px; font-size: 22px; }
+  .checkin-stamp-label { font-size: 10px; }
+  
+  /* Knowledge */
+  .knowledge-card { padding: 12px 14px; }
+  .k-term { font-size: 13px; }
+  .k-body { font-size: 13px; }
+  .k-example { font-size: 12px; padding: 8px 10px; }
+  .tip-body { font-size: 13px; }
+}
+
+@media (max-width: 400px) {
+  body { padding: 10px; }
+  .header h1 { font-size: 17px; }
+  .tab-btn { font-size: 12px; padding: 6px 8px; }
+  .today-card { padding: 8px 10px; }
+  .today-title { font-size: 13px; }
+  .detail-card { padding: 12px; }
+  .detail-title-text { font-size: 15px; }
+  .quiz-q { font-size: 13px; }
+  .checkin-header { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 360px) {
+  body { padding: 8px; }
+  .header h1 { font-size: 15px; }
+  .tab-btn { font-size: 11px; padding: 5px 6px; }
+  .shelf-grid { grid-template-columns: 1fr; }
+}
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.35); z-index: 200; backdrop-filter: blur(4px); }
+    .modal-overlay.show { display: block; }
+    .modal-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #fff; border-radius: 20px; padding: 24px; width: 90%; max-width: 640px; max-height: 80vh; z-index: 201; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.15); display: none; }
+    .modal-box.show { display: block; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; position: sticky; top: 0; background: #fff; padding-bottom: 12px; border-bottom: 1px solid #ede9e2; }
+    .modal-title { font-size: 16px; font-weight: 700; color: #3d3a35; }
+    .modal-close { border: none; background: #f0ebe4; padding: 4px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; color: #9a9a8a; cursor: pointer; }
+    .modal-quiz-item { padding: 10px 14px; border-bottom: 1px solid #f0ebe4; display: flex; gap: 10px; align-items: flex-start; }
+    .modal-quiz-item:last-child { border-bottom: none; }
+    .modal-q-num { flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+    .modal-q-num.md-data { background: #7baac4; } .modal-q-num.md-strategy { background: #7bc49b; }
+    .modal-q-text { font-size: 13px; color: #3d3a35; flex: 1; }
+    .modal-q-star { flex-shrink: 0; font-size: 14px; color: #e0d8cc; }
+    .modal-q-star.faved { color: #f5b342; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🐙 槐的挑战池</h1>
+      <span class="date-badge" id="dateBadge"></span>
+      <div class="deco"><span class="dot dpink"></span><span class="dot dgreen"></span><span class="dot dpeach"></span></div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tasks">🎯 今日三选一</button>
+      <button class="tab-btn" data-tab="quiz">📝 运营小测</button>
+ <button class="tab-btn" data-tab="checkin">🌱 每日打卡</button>
+    </div>
+    <div class="panel active" id="panel-tasks">
+      <div class="view active" id="viewPool">
+        <div class="progress-row"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><span class="progress-text" id="progressText">已完成 0</span></div>
+        <div class="top-bar"><div class="section-title" style="margin-bottom:0;">🎯 今日推荐 · 三选一</div><button class="refresh-btn" id="refreshBtn">🔄 换一批</button></div>
+        <div id="todayThree"></div>
+        <div class="completed-section" id="completedSection" style="display:none;">
+          <div class="section-title" style="margin-top:20px;">✅ 已完成的挑战 <span class="today-tag t-make" id="doneCount">0</span></div>
+          <div id="completedList"></div>
+        </div>
+      </div>
+      <div class="view" id="viewDetail">
+        <button class="back-btn" id="backBtn">← 返回今日推荐</button>
+        <div id="detailContent"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-quiz">
+      <div class="top-bar">
+        <div class="section-title" style="margin-bottom:0;">📝 今日4道 · 点击展开答案</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="fav-btn" id="favBtn">⭐ 收藏夹</button>
+          <button class="quiz-refresh-btn" id="quizRefreshBtn">🔄 换4道</button>
+          <button class="view-all-btn" id="viewAllBtn">📖 全部40道</button>
+        </div>
+      </div>
+      <div class="progress-row"><div class="progress-bar"><div class="progress-fill" id="quizProgressFill"></div></div><span class="progress-text" id="quizProgressText">已学 0/40</span></div>
+      <div id="quizList"></div>
+      <div class="knowledge-section">
+        <div class="section-title">📚 知识点笔记 <span class="today-tag t-analyze">与小测联动</span></div>
+        <div id="knowledgeList"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-checkin">
+ <div class="checkin-header">
+  <div class="checkin-streak" id="checkinStreak">🔥 <span id="streakDays">0</span> 天连续</div>
+  <div class="checkin-total">本月已打卡 <span id="monthDays">0</span> 天</div>
+ </div>
+ <div class="checkin-today">
+  <div class="checkin-status" id="checkinStatus">🌱 今日尚未打卡</div>
+  <div class="checkin-stamp-wrap">
+   <button class="checkin-btn" id="checkinBtn">🐙</button>
+   <div class="checkin-stamp-label" id="checkinStampLabel">盖个章</div>
+  </div>
+ </div>
+ <div class="checkin-calendar" id="checkinCalendar"></div>
+ <div class="checkin-history">
+  <div class="section-title">📋 打卡历史</div>
+  <div id="checkinHistory"></div>
+ </div>
+</div>
+
+<div class="footer">储备 30 项挑战 · 40 道小测 · 每天4道 · 收藏你喜欢的 🐙</div>
+  </div>
+  <!-- 全部题库弹窗 -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal-box" id="modalBox">
+    <div class="modal-header"><div class="modal-title" id="modalTitle">📖 全部题库（40道）</div><button class="modal-close" id="modalCloseBtn">✕ 关闭</button></div>
+    <div id="modalQuizList"></div>
+  </div>
+  <div id="helpModal" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border-radius:16px;padding:18px 22px;box-shadow:0 4px 24px rgba(0,0,0,0.12);max-width:460px;z-index:100;border:1px solid #f0c0c0;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:18px;">🐙</span><span style="font-weight:600;">爬爬来帮你</span><button onclick="document.getElementById('helpModal').style.display='none'" style="margin-left:auto;border:none;background:none;cursor:pointer;font-size:16px;color:#9a9a8a;">✕</button></div>
+    <div id="helpText" style="font-size:14px;color:#4a473f;line-height:1.6;margin-bottom:8px;"></div>
+    <div id="helpCopiedBox" style="display:none;background:#f8f4ee;border:1px dashed #d4a574;border-radius:10px;padding:12px 14px;font-size:13px;color:#6a5f4f;line-height:1.6;margin-bottom:10px;word-break:break-all;"></div>
+    <button id="helpCopyBtn" onclick="copyHelpMsg()" style="display:none;border:none;background:#ff9f7a;color:#fff;padding:8px 18px;border-radius:20px;font-size:14px;cursor:pointer;margin-bottom:6px;width:100%;">📋 一键复制，发给爬爬</button>
+    <div id="helpHint" style="display:none;font-size:12px;color:#9a9a8a;text-align:center;">📋 已复制到剪贴板！请粘贴到对话框发给爬爬～</div>
+  </div>
+  <script>
+    const now = new Date();
+    const wk = ['日','一','二','三','四','五','六'];
+    document.getElementById('dateBadge').textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${wk[now.getDay()]}`;
+
+    // ====== Ripple Effect ======
+    function addRipple(e) {
+      const btn = e.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple-effect';
+      ripple.style.left = (e.clientX - rect.left - 10) + 'px';
+      ripple.style.top = (e.clientY - rect.top - 10) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 500);
+    }
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (btn) addRipple(e);
+    });
+
+    // ====== Confetti ======
+    function spawnConfetti(x, y) {
+      const colors = ['#f0c0c0','#b8d9b8','#f5b342','#7baac4','#c4a7d4','#f5d6c6'];
+      for (let i = 0; i < 10; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = (x + (Math.random()-0.5)*40) + 'px';
+        piece.style.top = (y + (Math.random()-0.5)*20) + 'px';
+        piece.style.background = colors[i % colors.length];
+        piece.style.transform = `rotate(${Math.random()*360}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 800);
+      }
+    }
+
+    // ====== 40道题库 ======
+    const QUIZ_BANK = [
+      { id:1, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'DAU连续下降但新增在涨，这是什么信号？怎么分析？', a:'<strong>信号：</strong>新增涨但DAU跌 → 老用户流失速度>新增补充速度。<br><strong>分析：</strong>①看留存率 ②看流失用户等级 ③看活跃时长 ④检查运营事件<br><strong>应对：</strong>先稳老用户（召回福利），再排查新增渠道质量' },
+      { id:2, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'ARPU和ARPPU有什么区别？', a:'<strong>ARPU</strong>=总收入÷活跃用户 → 整体付费水平<br><strong>ARPPU</strong>=总收入÷付费用户 → 付费用户消费力<br><br>ARPU上升不一定好（分母变小）；ARPPU高ARPU低 → 付费渗透率低' },
+      { id:3, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'什么是次日/7日/30日留存率？健康值是多少？', a:'<strong>次日留存</strong> 40%+ → 新手引导质量<br><strong>7日留存</strong> 20%+ → 核心玩法吸引力<br><strong>30日留存</strong> 10%+ → 长期粘性<br>某级衰减过快（如次日→7日降超60%）→ 该阶段有流失原因需排查' },
+      { id:4, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'LTV是什么？运营中怎么用？', a:'<strong>LTV</strong>=用户从进入游戏到流失贡献的总收入<br><br>买量决策：LTV>CPI可持续买量 | 版本评估：新版本LTV是否提升？ | 分层：高LTV重点维护' },
+      { id:5, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'什么是Cohort分析？为什么比大盘留存更准确？', a:'同一批进入的用户单独追踪后续活跃。<br>大盘留存被「稀释」——新老混在一起看不清。<br>例：3月1日进的新用户次日45%，3月15日进的新用户次日38% → 渠道质量或版本体验下降' },
+      { id:6, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'DAU/MAU比值反映什么？健康区间？', a:'<strong>DAU/MAU</strong> = 用户粘性指标<br>健康区间 <strong>0.15-0.3</strong><br>低于0.15→粘性偏低 | 高于0.3→很粘但注意是否过度依赖' },
+      { id:7, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'人均在线时长突然下滑30%，怎么排查？', a:'①版本/活动问题(Bug/核心玩法改动/活动消耗过快) ②外部竞争(竞品新内容) ③用户结构变化(新增质量下降)<br>分等级/分渠道/分时段查看' },
+      { id:8, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'付费渗透率是什么？行业参考值？', a:'<strong>付费渗透率</strong>=付费用户÷活跃用户×100%<br>休闲2%-5% | 中度5%-10% | 重度10%-20%<br>低于参考→加强付费引导 | 高于参考→不过度压榨' },
+      { id:9, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'什么是「魔鬼期」？怎么应对？', a:'新增用户第1-7天流失率最高的时期。<br>第1天：核心玩法体验 第3天：小目标+奖励 第7天：社交/竞争激活<br>Push推送建议第2-3天开始' },
+      { id:10, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'MAU涨但DAU跌说明什么？', a:'粘性在下降。MAU涨说明来的人多了但DAU跌说明不是天天来。<br>可能原因：新增质量不高/老用户活跃频率降低/内容消耗完' },
+      { id:11, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'月流失率多少算正常？', a:'休闲20%-40% | 中度15%-25% | 重度5%-15%<br>超过50%→严重问题需紧急排查' },
+      { id:12, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'DNU/DPU/DAU/WAU/MAU之间的关系？', a:'DNU(日新增)→DPU(日付费)→DAU(日活)→WAU(周活)→MAU(月活)<br>健康：DNU/DAU稳定，DPU/DAU付费率正常，WAU/MAU>0.5' },
+      { id:13, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'什么是AARRR模型？', a:'Acquisition获取→Activation激活→Retention留存→Revenue收入→Referral传播<br>每个环节有对应指标和策略，不能跳步' },
+      { id:14, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'周末DAU比工作日高20%说明什么？', a:'正常。增幅15-25%正常 | 超30%→工作日活跃不足 | 低于5%→可能全天都有人玩<br>可在工作日加夜间活动/午间福利' },
+      { id:15, badge:'D', badgeClass:'db', tag:'数据分析', tagClass:'qt-data', q:'平均付费次数和ARPPU结合怎么分析？', a:'高ARPPU+高次数→核心付费健康 | 高ARPPU+低次数→大R存在但中腰部不足 | 低ARPPU+高次数→薄利多销 | 双低→付费体系需优化' },
+      { id:16, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'版本更新后差评激增第一步做什么？', a:'先平息情绪再处理问题。<br>①发公告+全服补偿 ②收集关键词定位矛盾 ③分类：Bug立即修/体验排期改/偏好安抚<br>差评不可怕，可怕的是假装看不见' },
+      { id:17, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'首充礼包转化率下降的原因和优化？', a:'原因：①吸引力下降 ②曝光不显眼 ③信任感降低 ④竞品更强<br>优化：A/B测试不同礼包/限时标签/新手任务后展示/先建信任再引导付费' },
+      { id:18, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'什么是用户分层？常用维度？', a:'按不同维度分群做差异化运营。<br>维度：①活跃度 ②付费 ③等级 ④渠道<br>核心推内测，沉默推回流，大R配专属——一套策略打天下不行' },
+      { id:19, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'游戏进入衰退期运营该做什么？', a:'三步走：①收割剩余价值(促销限时礼包) ②尝试回流(大力度召回) ③平稳过渡(减买量，引导核心到新作)' },
+      { id:20, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'新游上线首月核心关注哪些指标？', a:'①留存率 ②新手完成率 ③付费率(首周转化) ④用户反馈 ⑤DAU趋势<br>首月不过度追求收入，留存和体验优先' },
+      { id:21, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'什么是活动空窗期？怎么避免？', a:'连续多天无活动，活跃和付费快速下降。<br>避免：提前排活动日历/大小活动穿插/准备备用活动池/配置自动化周期性活动' },
+      { id:22, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'A/B测试基本流程？适合什么场景？', a:'流程：假设→变量→样本量→上线→分析→决策<br>适合：首充礼包/弹窗时机/文案点击率/奖励档位/UI布局<br>不适合：样本太小/周期太短/变量太多' },
+      { id:23, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'用户说「太肝了」怎么应对？', a:'先分析肝在哪：时间太长→加扫荡 | 操作繁琐→优化UI | 限时太多→弹性时间 | 重复性高→加倍率<br>核心：不是去掉肝，是让肝有明确回报' },
+      { id:24, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'常用召回手段有哪些？', a:'①Push推送 ②短信(成本高效果好) ③邮件 ④回归活动 ⑤社交召回(邀请离线好友)<br>从低到高成本排列' },
+      { id:25, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'游戏货币体系类型和设计注意事项？', a:'类型：免费/付费/活动(限时)/社交货币<br>注意：①兑换比例控制 ②防通胀 ③限时货币过期焦虑可驱动短期活跃' },
+      { id:26, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'活动结束后DAU和收入回落正常吗？怎么评估？', a:'回落正常。关键看基线是否高于活动前。<br>评估：活动期效果/活动后基线/增量留存/ROI<br>活动后基线比活动前低→透支了用户价值' },
+      { id:27, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'如何判断渠道买量质量？', a:'①次日留存 ②付费率 ③LTV ④7日留存 ⑤用户画像<br>付费率+留存+LTV加权打分，TOP加大投放，末尾优化或停投' },
+      { id:28, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'什么是社交裂变？运营怎么利用？', a:'利用用户社交关系链带来新用户。<br>形式：邀请好友/分享活动/组队任务/助力<br>要点：奖励有吸引力不过度/分享路径简短/承接好新用户' },
+      { id:29, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'竞品上线重磅新版本怎么应对？', a:'紧急：体验竞品版本/监控自身数据/上回流活动<br>中期：分析竞品优点/策划针对性活动<br>长期：建差异化壁垒/看竞品槽点优化自己' },
+      { id:30, badge:'S', badgeClass:'sb', tag:'运营策略', tagClass:'qt-strategy', q:'促活和留存有什么区别？', a:'促活：让已流失/沉默用户重新活跃(短期提DAU)<br>留存：让新用户持续留下(长期提生命周期)<br>留存是根本，促活是补充' },
+      { id:31, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'什么是RFM模型？', a:'R=最近消费时间 F=消费频率 M=消费金额<br>RFM都高→VIP | R高FM低→转化 | R低F高→召回 | 三低→低成本或放弃' },
+      { id:32, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'游戏生命周期四阶段及策略？', a:'①引入期(0-3月)：验证留存 ②成长期(3-12月)：扩大规模 ③成熟期(1-3年)：稳定收入 ④衰退期(3年+)：收割+迁移' },
+      { id:33, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'CPI/CPA/CPS分别用在什么场景？', a:'CPI(按安装)=品牌推广 | CPA(按行为)=精准获客 | CPS(销售分成)=渠道分成<br>前期CPI铺量，中期CPA优化，后期CPS做大R' },
+      { id:34, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'什么是用户画像？怎么做？', a:'对目标用户特征标签化描述。<br>维度：基础/行为/心理/付费<br>从数据提取→聚类→提炼画像→指导运营' },
+      { id:35, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'什么是用户粘性？怎么衡量？', a:'用户对游戏的依赖程度。<br>衡量：DAU/MAU比值/人均时长/登录次数/7日30日留存/月活跃天数' },
+      { id:36, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'自然量和买量怎么平衡？', a:'自然量(免费但不可控) vs 买量(可控但成本高)<br>健康：自然量占比30%-50%<br>低于20%→过度依赖买量' },
+      { id:37, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'留存率曲线不同形状代表什么？', a:'陡降→新手引导有问题 | 缓降→平滑流失 | 阶梯→某节点有流失原因 | 反弹→有回流拉动' },
+      { id:38, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'什么是DAU成本？怎么算？', a:'DAU成本=(买量+活动+服务器+人力)÷DAU<br>对比渠道优化投放 | LTV>DAU成本×平均生命周期→健康' },
+      { id:39, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'热度效应和长尾效应分别怎么利用？', a:'热度(短期暴增)→配合大活动拉新，风险是热度后退潮<br>长尾(稳定持续)→内容更新/社交系统/竞技系统<br>用热度拉新，用长尾留住' },
+      { id:40, badge:'D', badgeClass:'db', tag:'运营概念', tagClass:'qt-data', q:'什么是沉没成本误区？运营怎么避免？', a:'因为已投入而不愿放弃不合理的事。<br>避免：设止损线/定期问"如果第一天还会做吗"/区分坚持和沉没成本' }
+    ];
+
+        const KNOWLEDGES = [
+      { term:'DAU/MAU/WAU', body:'<strong>DAU（日活）</strong>一天内登录 | <strong>WAU（周活）</strong>一周内 | <strong>MAU（月活）</strong>一月内<br>DAU/MAU比值反映粘性，健康0.15-0.3<br>DAU涨MAU跌→留存有问题 | MAU涨DAU跌→粘性下降<br><strong>对应：</strong>题1/6/10',
+        example:'<strong>📌 案例：</strong>某游戏春节期间DAU从5万涨到8万（+60%），MAU从15万涨到18万（+20%）。DAU/MAU从0.33升到0.44，说明节日活动带动了日活跃度提升。但节后DAU回落到5.5万，MAU回落到16万 → 节日拉来的人有一部分留下了（MAU净增1万），但日活回落说明节日效应在消退。' },
+      { term:'LTV/ARPU/ARPPU', body:'<strong>LTV</strong>=生命周期价值 | <strong>ARPU</strong>=总收入÷活跃用户 | <strong>ARPPU</strong>=总收入÷付费用户<br>LTV>CPI可持续买量 | ARPU上升不一定好 | ARPPU高ARPU低→付费渗透率低<br><strong>对应：</strong>题2/4/15',
+        example:'<strong>📌 案例：</strong>某游戏月收入100万，DAU 20万，付费用户1万。ARPU=100万÷20万=5元；ARPPU=100万÷1万=100元。ARPPU很高（100元）但付费渗透率只有5%（1万÷20万），说明收入全靠大R撑着。策略方向应该是提高付费渗透率，比如出低价首充礼包，而不是继续提高ARPPU。' },
+      { term:'留存率与Cohort', body:'次日40%+ 7日20%+ 30日10%+<br>Cohort=同一批用户单独追踪，比大盘留存更准<br><strong>对应：</strong>题3/5/9/37',
+        example:'<strong>📌 案例：</strong>某游戏3月1日进新用户1000人，次日留存450人（45%），7日留存200人（20%），30日留存100人（10%）。3月15日改版后新用户次日留存降到38%，7日降到15% → 说明改版让新用户流失加速。用Cohort分析比看大盘留存更早发现问题，因为大盘会把新旧用户混在一起，看不出变化。' },
+      { term:'用户分层与RFM', body:'分层维度：活跃/付费/等级/渠道<br>RFM：最近消费/频率/金额<br><strong>对应：</strong>题18/31',
+        example:'<strong>📌 案例：</strong>某游戏按RFM将用户分4层：①VIP层（近3天有消费、月消费5次+、累计>5000元）→ 专属客服+新版本提前体验；②核心层（近7天有消费、月2-4次）→ 推送限时折扣礼包；③沉默层（30天未登录但历史付费>500元）→ 发回归短信+回归奖励；④流失层（60天未登录、消费<100元）→ 低成本维护，不投入召回资源。' },
+      { term:'AARRR与生命周期', body:'获取→激活→留存→收入→传播<br>游戏四阶段：引入/成长/成熟/衰退<br><strong>对应：</strong>题13/19/20/32',
+        example:'<strong>📌 案例：</strong>《原神》的AARRR：①获取：买量+品牌广告+口碑传播；②激活：新手开放世界探索+剧情沉浸；③留存：版本更新+每日委托+树脂系统；④收入：角色卡池+月卡+纪行；⑤传播：二创社区+角色厨力+好友联机。生命周期：2020年上线→引入期验证留存→2021-2023成长期全球扩张→现在成熟期稳定运营中。' }
+    ];
+
+        const ALL_TASKS = [
+      // ===== 🎮 Vibe Coding - 用AI做网页/工具 (10 tasks) =====
+      { id:1, type:'make', icon:'🐱', title:'用AI做一个「宠物心情日记」互动页', brief:'给小猫/小狗设计一个每日心情记录页', tag:'Vibe Coding', tools:['Claude','ChatGPT','浏览器'],
+        desc:'学会「如何用AI做出一个能用的工具」——以「宠物心情日记」为例。每天选择宠物的表情（开心/难过/无聊/生气），写一句话日记，数据保存到下次打开还在。<br><br>学到的核心技能：如何向AI描述产品需求、如何让AI迭代UI、本地数据存储（LocalStorage）。',
+        steps:['【第一步——打开AI工具】打开 Claude 官网 chat.claude.ai（或 ChatGPT）。','【第二步——给AI第一次指令】复制指令给AI：「请帮我做一个宠物心情日记的网页HTML，所有代码写在一个文件里。页面顶部显示今天的日期和星期，显示一行「XXX今天心情怎么样？」。中间展示4个心情卡片：开心😊 无聊😐 难过😢 生气😠，选中心情后出现文本框可以写日记，有「记录今天」按钮保存到localStorage，底部显示历史记录。风格温暖可爱手绘风，暖色调。」','【第三步——AI出代码后怎么用】复制代码→桌面新建文本文档→重命名为「宠物日记.html」→粘贴保存→双击在浏览器打开。','【第四步——测试】依次测试日期、点卡片、写日记、记录按钮、刷新页面看历史。有问题告诉AI修正。','【第五步——美化】让AI改背景渐变、悬停效果、字体，覆盖原文件刷新看效果。','【第六步——每天打开用】截图发我看看～🐾'] },
+
+      { id:9, type:'make', icon:'🗺️', title:'用Claude做「RPG风格」运营技能天赋树', brief:'把运营技能做成游戏天赋树样式', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'把你作为运营想掌握的技能，做成RPG游戏天赋树互动网页。每个技能点亮后有发光特效，像游戏里加点一样有成就感。<br><br>三大分支：数据洞察、策略策划、用户管理，每支3-4个技能。',
+        steps:['【第一步——打开Claude】访问 chat.claude.ai。','【第二步——粘贴指令给AI】「请帮我做一个RPG游戏风格的运营技能天赋树HTML页面。页面标题「运营成长之路」。三大分支横向排列：🌟数据洞察（数据分析思维/留存率分析/AARRR模型/数据可视化）🌟策略策划（活动策划/A/B测试/竞品分析/用户分层）🌟用户管理（社区运营/用户激励/需求分析/用户体验）。每个技能卡片默认灰色点击后金色发光显示已掌握。顶部有进度条。深色星空背景金色点缀。localStorage保存。」','【第三步——打开测试】复制代码存为「技能天赋树.html」双击打开。','【第四步——调整技能名】让AI改成你自己的技能清单。','【第五步——加特效】让AI加全点亮庆祝动画。','【第六步——每天点亮一个】全部点亮截图发我 🏆'] },
+
+      { id:4, type:'make', icon:'📇', title:'用Claude做「每日一卡」运营术语卡片机', brief:'每次打开随机显示一个运营术语解释', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'像闪卡学习App一样的运营术语学习网页。正面是术语名称，点击翻转显示解释。通勤路上打开看几张，不知不觉记住几十个术语。',
+        steps:['【第一步——准备素材】从挑战池的「运营小测」Tab选10个术语。','【第二步——给Claude指令】让AI生成卡片机HTML：中央卡片正面显示术语，点击翻转显示解释，有「下一张」按钮随机切换，进度显示已看X/20张，localStorage保存学习进度。','【第三步——测试】保存为「运营卡片机.html」双击测试翻转和切换。','【第四步——扩充题库】让AI增加到30张卡片。','【第五步——加收藏功能】收藏按钮➕收藏列表。','【第六步——每天看5张】一周后发截图 🃏'] },
+
+      { id:5, type:'make', icon:'📊', title:'用Cursor搭「周报数据」自动可视化页', brief:'把每周数据做成自动渲染的图表页', tag:'Vibe Coding', tools:['Cursor','Claude'],
+        desc:'把导出数据→复制Excel→手动做图表的工作流，变成「打开网页→粘贴数据→自动出图」。需要先安装Cursor（cursor.com免费版）。',
+        steps:['【第一步——安装Cursor】去 cursor.com 下载安装，免费版够用。','【第二步——准备数据】准备一周数据：日期,DAU,新增用户,次日留存率,付费率,收入。','【第三步——给Cursor指令】按 Ctrl+Shift+I 打开AI对话框，让Cursor生成含数据输入区、DAU折线图、留存率趋势图、收入柱状图+付费率折线组合图的数据可视化HTML。','【第四步——测试】保存为「周报可视化.html」粘贴数据测试。','【第五步——调样式】让Cursor改配色加数据标签。','【第六步——加导出】让AI加导出图片按钮，每周复用 🎯'] },
+
+      { id:14, type:'make', icon:'✅', title:'做一个「活动上线检查清单」交互工具', brief:'每次上线活动前按清单检查，不错过任何一步', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'运营做活动上线最怕漏步骤。把上线前要检查的事项做成可打勾的交互清单，全部完成后显示「可以上线了！」。',
+        steps:['【第一步——列清单】列出8-12项上线检查事项。','【第二步——给Claude指令】让Claude生成检查清单HTML：复选框➕进度条➕全完成庆祝动画➕localStorage保存。','【第三步——测试】保存为「上线检查清单.html」逐项勾选测试。','【第四步——加功能】加重置按钮和导出检查结果。','【第五步——定制】改成你的游戏名和活动类型。','【第六步——每次上线前用 🛡️'] },
+
+      { id:13, type:'make', icon:'✍️', title:'用AI做一个「运营文案生成器」小工具', brief:'活动公告/推送文案/公告模板一键生成', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'写公告、写推送、写活动提示——这些文案工作可以工具化。输入几个关键信息，自动生成三种不同风格的文案。注意：所有文案用JavaScript模板字符串拼接，不需要AI API。',
+        steps:['【第一步——确定文案模板】列出3种文案类型：邮件公告版/Push推送版/社媒宣传版。','【第二步——给Claude指令】让Claude生成左右两栏布局的文案生成器HTML：左栏输入活动名称/时间/奖励/面向用户/活动类型，右栏三个标签页分别显示不同风格文案，一键复制。','【第三步——测试】保存测试生成效果和复制功能。','【第四步——加模板】增加到5个模板加召回文案版。','【第五步——美化】Notion风格布局。','【第六步——随时用 ✍️'] },
+
+      { id:18, type:'make', icon:'🧮', title:'用AI做「运营数据日报」自动生成器', brief:'每天输入数据自动生成日报文字', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'每天早上输入DAU、新增、收入等关键数据，自动生成一段数据日报文字，包含环比变化、异常提醒、关注建议。适合快速出日报发群。',
+        steps:['【第一步——确定日报指标】列出你每天关注的5-8个指标。','【第二步——给Claude指令】让Claude生成数据日报工具HTML：输入区包含各指标输入框，点击生成后输出日报总结（含较昨日环比和异常标记）。','【第三步——测试】用真实数据测试日报输出。','【第四步——加风格】让AI加「早报版」「群简报版」「详细版」三种输出风格。','【第五步——加自动对比】自动计算较昨日变化百分比，↑↓箭头标记。','【第六步——每天早上用 🧮'] },
+
+      { id:19, type:'make', icon:'📈', title:'用AI做「留存率预测模型」互动页', brief:'输入当前留存率，AI预测未来趋势', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'输入次日/7日/30日留存率，页面自动生成留存率衰减曲线，预测60日留存。直观理解留存率变化对长期的影响。',
+        steps:['【第一步——准备数据】准备你关注游戏的次日/7日/30日留存率。','【第二步——给Claude指令】让Claude生成留存率预测页HTML：输入3个留存率数据→画出衰减曲线图（Canvas实现）→预测60日留存率值。','【第三步——测试】输入真实数据验证曲线是否合理。','【第四步——加行业对比】显示行业健康参考区间。','【第五步——加导出】生成图片保存功能。','【第六步——做版本留存评估 📈'] },
+
+      { id:21, type:'make', icon:'🎯', title:'用Claude做「A/B测试结果分析器」互动页', brief:'输入A/B测试数据自动判断显著性', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'A/B测试跑完之后，结果怎么判断？做一个分析器页面：输入A组和B组的用户数和转化数，自动计算转化率、提升幅度和统计显著性，告诉你哪个方案赢了。',
+        steps:['【第一步——了解A/B测试基础】熟悉A/B测试的核心概念：对照组/实验组、转化率、显著性。','【第二步——给Claude指令】「请做一个A/B测试结果分析器HTML。输入两组数据（每组用户数和转化数），自动计算：转化率、提升百分比、z-score、p-value（用标准正态分布近似）、是否达到统计显著性（p<0.05）。用绿色/红色显示结果，干净数据面板风格。」','【第三步——测试】输入假设数据：A组10000人转化500(5%)，B组10000人转化580(5.8%)，看是否判为显著。','【第四步——加可视化】让AI加两组转化率的对比柱状图。','【第五步——加多指标】让AI支持同时输入点击率/转化率/付费率等多指标。','【第六步——实际用来分析 🎯'] },
+
+      { id:25, type:'make', icon:'🎮', title:'用Claude做「运营术语测验游戏」互动页', brief:'把运营术语做成选择题小游戏', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'用运营术语题库做一个选择题小游戏！每次随机出题，选对得分，选错显示正确答案，最后显示总分和排名。学习术语不枯燥～',
+        steps:['【第一步——准备题目】从挑战池「运营小测」Tab选15道选择题格式的题目。','【第二步——给Claude指令】「请做一个运营术语测验游戏HTML。从题库随机抽题，每题4个选项，选对+10分选错显示正确答案。10题一轮，结束后显示总分和评语。有进度条和时间统计。游戏风格设计。」','【第三步——测试】保存为「运营测验游戏.html」玩一轮试试。','【第四步——加题目】让AI增加到30题。','【第五步——加排行榜】用localStorage保存历史最高分。','【第六步——挑战我！截图你的最高分 🎮'] },
+
+      // ===== 🤖 AI工具探索 - 体验不同AI (6 tasks) =====
+      { id:22, type:'design', icon:'🎨', title:'用Midjourney/DALL·E设计游戏活动Banner', brief:'AI生图+文案，做出活动banner方案', tag:'AI工具探索', tools:['Midjourney/DALL·E','Canva','Claude'],
+        desc:'活动上线需要banner图！用Midjourney或DALL·E生成背景图，Claude出文案方案，Canva合成。学会用AI搞定运营设计的完整链路。<br><br>不需要Midjourney付费版？用DALL·E（ChatGPT内置）或通义万相（阿里免费）也行。',
+        steps:['【第一步——确定活动主题】比如端午节/周年庆/新版本。','【第二步——AI出文案方案】让Claude出3套banner方案（主标题/副标题/配色/风格关键词）。','【第三步——AI生图】把方案描述给DALL·E（ChatGPT里直接说）/Midjourney/通义万相，生成banner背景图。','【第四步——合成】去 Canva（canva.cn 免费版）把文案和背景图合成banner。','【第五步——迭代】不满意就让AI调整配色和风格再生成。','【第六步——发给我看 🎨】'] },
+
+      { id:23, type:'design', icon:'🎵', title:'用Suno AI做一首游戏主题曲Demo', brief:'用AI音乐工具做15秒游戏BGM', tag:'AI工具探索', tools:['Suno','浏览器'],
+        desc:'体验AI音乐生成！用Suno AI（suno.ai）输入风格描述，生成一段游戏主题曲/活动BGM。不用任何音乐基础，描述你想要的感觉就行。<br><br>产出是一段15-30秒的AI音乐，可以当活动视频的背景音乐。',
+        steps:['【第一步——注册Suno】访问 suno.ai，用Google/ Discord账号登录，免费版每天有额度。','【第二步——确定音乐风格】想好你的游戏类型和想要的感觉（比如「国风RPG的悠扬笛子」「休闲游戏的轻快钢琴」「战斗场景的热血摇滚」）。','【第三步——写Prompt】在Suno输入描述：「一段[风格描述]的游戏背景音乐，[情绪关键词]，[乐器]为主，节奏[快/慢/中速]」。可以用中文描述，Suno支持中文Prompt。','【第四步——生成和试听】点生成等30秒，试听效果。不满意调整描述重新生成。','【第五步——下载保存】选中最好的版本下载为MP3。','【第六步——发给我听听 🎵】'] },
+
+      { id:24, type:'design', icon:'📊', title:'用Gamma AI做运营汇报PPT', brief:'AI一键生成运营数据汇报PPT', tag:'AI工具探索', tools:['Gamma','浏览器'],
+        desc:'做PPT太费时间？用Gamma（gamma.app）输入主题就能自动生成一份漂亮的PPT。这个挑战让你用Gamma做一份运营数据分析汇报PPT。<br><br>学到的技能：用AI做PPT，以后周报汇报、活动复盘都省时。',
+        steps:['【第一步——注册Gamma】访问 gamma.app，用Google账号登录免费版。','【第二步——准备内容】准备好你要汇报的数据：DAU趋势/活动效果/留存变化/收入等，整理成关键词。','【第三步——让Gamma生成】点「Create new AI」→描述PPT主题：「XX游戏5月运营数据汇报，包含DAU趋势、活动效果分析、留存率变化、收入概况、下月计划」→选择风格模板→点生成。','【第四步——编辑调整】Gamma生成后可以直接编辑文字、换图、调布局，改到你满意。','【第五步——加入真实数据】把AI生成的示例数据换成你的真实数据。','【第六步——导出分享】导出为PDF或分享链接，发给我看看 📊'] },
+
+      { id:26, type:'make', icon:'🎬', title:'用Runway AI做15秒游戏预告视频', brief:'AI文字生视频，制作游戏活动预告', tag:'AI工具探索', tools:['Runway','浏览器'],
+        desc:'体验AI视频生成！用Runway（runwayml.com）输入文字描述或上传图片，生成一段15秒的视频片段。可以用在你的游戏活动预告或社媒宣传中。<br><br>不需要剪辑基础，描述你想看到的画面就行。',
+        steps:['【第一步——注册Runway】访问 runwayml.com，注册免费版（有试用额度）。','【第二步——确定视频主题】比如「端午节龙舟竞速」「新版本BOSS登场」「节日烟花庆典」。','【第三步——写视频Prompt】在Runway的「Text to Video」功能输入：「[场景描述]，[风格]，[色调]，[动作描述]」。例如：「一只巨大的中国龙在云端飞行，周围有金色粒子效果，史诗风格，电影质感」。','【第四步——生成和预览】等1-2分钟生成，预览效果。不满意调整Prompt重试。','【第五步——加上文案】用剪映或Canva在视频上加活动标题和日期文字。','【第六步——发给我看 🎬】'] },
+
+      { id:27, type:'make', icon:'🚀', title:'用v0.dev做一页游戏Landing Page', brief:'体验新的AI编码工具v0.dev', tag:'AI工具探索', tools:['v0.dev','浏览器'],
+        desc:'v0.dev（Vercel出品）是一个专门生成UI的AI工具。输入文字描述直接生成精美的页面代码。体验不同于Claude的AI编码方式。<br><br>这个挑战做一个游戏活动Landing Page（落地页），展示活动信息、奖励和倒计时。',
+        steps:['【第一步——访问v0.dev】打开 v0.dev，用GitHub账号登录（免费）。','【第二步——确定页面内容】想好你的页面要展示什么：游戏名称、活动名称、活动时间、奖励列表、倒计时、下载按钮。','【第三步——输入描述】在v0.dev输入：「请帮我做一个游戏活动Landing Page。包含：顶部导航栏（游戏Logo+活动名称）、英雄区（大背景图+活动标题+倒计时）、奖励展示区（3个卡片展示不同奖励）、CTA按钮（立即参与）、底部信息区。风格：游戏化、深色背景、金色点缀、有动效。」','【第四步——预览和迭代】v0.dev实时生成预览，不满意直接对话修改。','【第五步——下载代码】点右上角「Export」下载HTML代码。','【第六步——发截图给我 🚀】'] },
+
+      { id:28, type:'make', icon:'🧠', title:'用Claude Artifacts做运营流程图', brief:'用Claude的Artifacts功能画图', tag:'AI工具探索', tools:['Claude','浏览器'],
+        desc:'Claude的Artifacts功能不仅能写代码，还能生成图表！用Claude直接生成运营流程图、用户路径图、活动时间线图等。完全不需要画图软件。<br><br>产出是一张可以复制粘贴到飞书/文档里的SVG图表。',
+        steps:['【第一步——打开Claude】访问 claude.ai，确保Artifacts功能开启（默认开启）。','【第二步——想一个流程图】比如「用户从下载到付费的完整路径」「活动从策划到上线的流程图」「用户流失原因分析鱼骨图」。','【第三步——输入指令】「请用SVG画一张[主题]流程图。要求：清晰的分步骤布局，不同颜色区分不同阶段，包含箭头连接线，文字标注，风格简洁商务蓝。把SVG代码用Artifacts展示出来。」','【第四步——查看和下载】Claude会在右侧显示SVG图，你可以点击下载为SVG或截图。','【第五步——迭代调整】让Claude改布局、加节点、换颜色。','【第六步——粘贴到文档里】复制SVG到飞书文档或截图保存 🧠'] },
+
+      // ===== 🎨 设计 - 做自己的页面 (3 tasks) =====
+      { id:16, type:'design', icon:'🖼️', title:'用AI做个人作品集展示页', brief:'把你的运营学习成果做成漂亮的展示页', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'用Claude把你做过的运营学习成果做成瀑布流作品展示页，求职或汇报非常加分。',
+        steps:['【第一步——准备素材】4-6张成果截图存桌面「作品素材」文件夹。','【第二步——给Claude指令】生成瀑布流布局作品集HTML：悬停放大效果➕大图预览模态框➕分类筛选按钮。','【第三步——替换真实图片】让AI把占位色块改为work1.png等真实图片路径。','【第四步——加交互】点赞按钮❤️和分类筛选。','【第五步——发布】发给我看 🖼️'] },
+
+      { id:17, type:'design', icon:'📅', title:'用AI做手帐风格个人主页', brief:'像手帐日历一样有涂鸦/贴纸感的主页', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'手帐风格学习主页：日期、学习计划、成就徽章、每日格言。打开就像翻开手帐本。',
+        steps:['【第一步——小红书找参考】搜手帐风主页找参考截图。','【第二步——给Claude指令】生成含日期/格言/待办/成就徽章的手帐HTML。','【第三步——预览调整】保存预览。','【第四步——加涂鸦】角落装饰➕今日小结。','【第五步——个性化】改成你的名字。','【第六步——每天打开用 📅'] },
+
+      { id:29, type:'design', icon:'📝', title:'用Claude做「活动日历规划」互动页', brief:'全年运营活动日历可视化工具', tag:'Vibe Coding', tools:['Claude','浏览器'],
+        desc:'运营需要提前规划全年活动节点。做一个全年的活动日历规划工具：按月展示活动卡片，可以添加/编辑/删除活动，不同节日用不同颜色标记。活动排期一目了然。',
+        steps:['【第一步——列出全年节点】春节/端午/暑期/中秋/国庆/圣诞/元旦等主要运营节点。','【第二步——给Claude指令】「请做一个全年运营活动日历HTML。按月切换显示，每个月以日历网格展示。每个活动是一个彩色卡片放在对应日期上，显示活动名称。点击日期可以添加活动（弹出表单：活动名称/类型/描述）。已有活动可以编辑和删除。活动类型用不同颜色区分：拉新🟢促活🟡付费🔴品牌🔵。数据存localStorage。」','【第三步——测试】保存为「活动日历.html」添加几个测试活动。','【第四步——加导出】让AI加一键导出全年活动计划文本。','【第五步——定制】加上你负责的游戏名称作为标题。','【第六步——用来做全年规划 📝】'] },
+
+      // ===== 🔧 搭建实用工具 (4 tasks) =====
+      { id:3, type:'build', icon:'📋', title:'搭「今日运营健康度」自动检查工具', brief:'输入几个数据，自动判断今天运营状态', tag:'搭建工具', tools:['Claude','浏览器'],
+        desc:'每天输入DAU/留存率/付费率/收入，自动判断🟢健康/🟡关注/🔴预警。',
+        steps:['【第一步——确定标准】写下3-5个指标的阈值。','【第二步——给Claude指令】生成健康度检查器HTML。','【第三步——测试】输入数据测试判断逻辑。','【第四步——改成你的标准】换成你自己的实际阈值。','【第五步——加历史】保存最近7天记录。','【第六步——每天用 🐙'] },
+
+      { id:7, type:'build', icon:'📚', title:'搭建个人专属「运营百科」知识库', brief:'在飞书里建立系统化的运营知识体系', tag:'搭建系统', tools:['飞书文档','Claude','DeepSeek'],
+        desc:'运营知识不整理过两周就忘。在飞书建6个子文档系统化管理：核心概念/数据公式/真实案例/避坑指南/效率工具/学习日记。以后遇到问题先翻库。',
+        steps:['【第一步——建框架】飞书文件夹里建6个子文档。','【第二步——填充初稿】让Claude/DeepSeek生成30条知识。','【第三步——整理】逐条分类复制到对应文档，加你自己理解。','【第四步——每天加一条】完成挑战后往知识库里加内容。','【第五步——加标签】#数据 #活动 #AI工具 方便搜索。','【第六步——两周后发给我看 📚'] },
+
+      { id:30, type:'build', icon:'⚡', title:'用Trae AI搭建运营数据看板', brief:'用Trae的AI功能搭一个数据看板', tag:'搭建工具', tools:['Trae','浏览器'],
+        desc:'Trae是字节跳动的AI编辑器（类似Cursor）。用Trae的AI对话搭建一个运营数据看板：输入数据自动生成仪表盘，直观展示核心指标。体验不同AI编码工具的差异。<br><br>需要先下载安装Trae（trae.ai，免费），支持中文对话。',
+        steps:['【第一步——安装Trae】去 trae.ai 下载安装。','【第二步——准备数据】准备你关注游戏的5-8个核心指标和最近一周数据。','【第三步——用Trae创建项目】打开Trae→新建项目→按Ctrl+K打开AI对话→输入：「请帮我做一个运营数据看板HTML。展示DAU/新增用户/留存率/付费率/总收入/ARPU共6个指标。用卡片展示今日数据+较昨日变化（↑↓），底部展示过去7天趋势折线图。风格：商务数据面板，深蓝色调。」','【第四步——预览调整】Trae可以在右侧预览，不满意继续对话修改。','【第五步——加数据源】让AI把数据改为可从CSV导入或手动输入。','【第六步——截图发我 ⚡】'] },
+
+      { id:31, type:'build', icon:'🤖', title:'把重复工作写成AI Prompt模板', brief:'让AI替你干重复活，节省50%时间', tag:'搭建工具', tools:['Claude','DeepSeek','飞书文档'],
+        desc:'挑出工作中3个最耗时的文字工作，给每个写一个精准的AI prompt模板。以后每次遇到同样任务，复制模板换关键词就搞定。',
+        steps:['【第一步——找出3个重复工作】比如写周报/写公告/分析数据波动。','【第二步——为第1个写模板】让Claude设计包含角色设定/输入格式/输出格式/示例的prompt模板。','【第三步——实际测试】填真实数据跑一次，看输出质量。','【第四步——重复写2和3】同样流程。','【第五步——优化】加few-shot示例和约束条件。','【第六步——发给我测试 🤖'] },
+
+      // ===== 🎲 实战策划 (2 tasks) =====
+      { id:11, type:'play', icon:'🎲', title:'用AI策划游戏线上活动——以「端午节」为例', brief:'用AI从0到1写完整活动方案', tag:'运营实战', tools:['Claude','DeepSeek','飞书文档'],
+        desc:'用AI从0到1写一份完整的端午节游戏线上活动策划方案！AI负责出方案框架，你来判断和调整——这是运营最核心的能力。',
+        steps:['【第一步——定背景】确定游戏名称/类型/活动时间/目标/目标用户。','【第二步——让AI出方案】让Claude/DeepSeek按9个板块输出完整方案（名称/背景/目标KPI/玩法/奖励/触达/预期/评估/风险）。','【第三步——逐条审批】绿黄红三色标记AI方案。','【第四步——整合正式方案】飞书整合800-1200字。','【第五步——加落地排期】让AI生成上线前7天到结束后3天的排期表。','【第六步——发给我评审 🎲'] },
+
+      { id:32, type:'play', icon:'📊', title:'用AI做「竞品功能对比矩阵」工具', brief:'交互式竞品功能对比页面', tag:'运营实战', tools:['Claude','浏览器','七麦数据'],
+        desc:'竞品分析的核心：功能对比。用Claude做一个交互式竞品功能对比矩阵页面。列出你关注的几款游戏，在多个维度上打勾对比，一目了然看出各自优劣势。<br><br>产出是一个可以反复用的竞品对比工具。',
+        steps:['【第一步——确定竞品和维度】选3-5款竞品游戏，确定对比维度（付费模式/社交系统/竞技玩法/美术风格/运营活动频率/用户社区等8-12个维度）。','【第二步——给Claude指令】「请做一个竞品功能对比矩阵HTML。表格行是竞品游戏名，列是对比维度。每个单元格可以点选：✅有/⚠️部分有/❌没有，点击循环切换。顶部有自动评分：计算每个游戏的总分（✅+1分⚠️+0.5分❌0分），显示排名。可添加备注文字在单元格里。风格：干净数据表风格，清爽蓝白配色。」','【第三步——测试】保存为「竞品对比.html」，填入你搜集的信息。','【第四步——加视觉】让AI添加雷达图展示各维度对比。','【第五步——加导出】一键导出对比结果为表格文本。','【第六步——发给我看看 📊】'] }
+    ,
+      { id:41, type:'build', icon:'🔄', title:'内容创作流水线——文案到发布一条龙', brief:'Claude->Midjourney->Canva->发布', tag:'工作流', tools:['Claude','Midjourney/DALL-E','Canva'], desc:'体验完整的内容创作工作流：Claude写文案->Midjourney/DALL-E生图->Canva合成成品->发布。运营日常最常用的工作流之一。', steps:['Claude写3套社媒文案','DALL-E/Midjourney生成宣传图','Canva合成导出PNG','Claude改成多平台版本','Claude制定发布排期','一周后截图发我复盘'] },
+      { id:42, type:'build', icon:'📊', title:'数据报告自动化——周报全流程AI搞定', brief:'数据->Claude分析->Gamma PPT', tag:'工作流', tools:['Claude/Cursor','Gamma','DeepSeek'], desc:'从数据到分析报告到PPT全AI搞定。串联：周报可视化工具->Claude分析->Gamma生成PPT。每周周报从2小时缩到20分钟。', steps:['用周报可视化页导出图表截图','把数据给Claude分析异常趋势','提炼3-5条核心发现','Gamma生成5页周报PPT','图表截图插入PPT对应页','导出PDF发团队'] },
+      { id:43, type:'build', icon:'🎪', title:'活动上线全链路——策划到执行一条龙', brief:'策划->Banner->BGM->公告->检查', tag:'工作流', tools:['Claude','DALL-E','Suno','Canva'], desc:'用AI完成一次活动上线的全部物料：活动方案->Banner图->背景音乐->公告文案->上线清单。串联4个AI工具体验活动运营全链路。', steps:['Claude设计活动方案（名称/玩法/奖励/周期）','DALL-E生成活动Banner背景图','Suno生成30秒活动背景音乐','Claude写3版公告（弹窗/邮件/Push）','用上线检查清单逐项确认','发所有物料给我'] },
+      { id:44, type:'build', icon:'💬', title:'用户反馈分析——评论到报告全自动', brief:'采集->DeepSeek->Claude->Gamma', tag:'工作流', tools:['TapTap','DeepSeek','Claude','Gamma'], desc:'反馈分析全流程自动化：TapTap采集评论->DeepSeek情绪分析->Claude写简报->Gamma生成汇报PPT。每次版本更新都可以跑一遍。', steps:['TapTap复制50条评论到飞书','DeepSeek分析情感和前5大问题','Claude写300字用户反馈简报','Gamma生成3页汇报PPT','回评论区手动验证AI结论','发分析闭环给我'] },
+      { id:45, type:'build', icon:'📡', title:'竞品监控自动化——日报到洞察', brief:'监控->记录->AI分析->日报', tag:'工作流', tools:['七麦数据','DeepSeek','飞书','Claude'], desc:'搭建持续竞品监控工作流：每天5分钟看动态->记录飞书->每周AI分析->输出简报。坚持一个月能预测竞品节奏。', steps:['确定3-5款竞品每天看排名','飞书多维表格记录动态','周末DeepSeek分析竞品趋势','Claude写200字竞品周报发群','粘贴到飞书文档存档','月底发全部记录给我'] }];;
+
+    const tips = ['每项任务前有✅勾选框，点选即完成 🎯','新增收藏⭐功能，喜欢的题目点星标收藏','按钮点击有波纹特效 ✨','选最有感觉的开始 🐙','点击🐙盖章签到，不要断签哦 🔥','运营小测每天4道，随时点换一批 📝','完成挑战记得截图发我看看 👀','试试各种AI工具，每个都有新体验 🚀'];
+
+    let completedIds = new Set();
+    let currentDisplayed = [];
+    let quizLearned = new Set();
+    let favIds = new Set();
+    let todayQuizIds = [];
+    let showingFavs = false;
+
+    
+// ====== Check-in System ======
+var CHECKIN_KEY = 'challenge_checkin_v1';
+function getCheckinData() {
+    try { var d = JSON.parse(localStorage.getItem(CHECKIN_KEY)); if (d && d.records) return d; } catch(e) {}
+    return { records: [], streak: 0, lastDate: '' };
+}
+function saveCheckinData(data) { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(data)); } catch(e) {} }
+function getDateStr(d) { var y = d.getFullYear(); var m = String(d.getMonth() + 1).padStart(2, '0'); var day = String(d.getDate()).padStart(2, '0'); return y + '-' + m + '-' + day; }
+function getTodayStr() { return getDateStr(new Date()); }
+function getMonthStr(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+function doCheckin() {
+    var data = getCheckinData(); var today = getTodayStr(); var yesterday = getDateStr(new Date(Date.now() - 86400000));
+    if (data.records.indexOf(today) >= 0) return;
+    data.records.push(today);
+    if (data.lastDate === yesterday || data.lastDate === '') { data.streak = (data.lastDate === yesterday) ? data.streak + 1 : 1; } else { data.streak = 1; }
+    data.lastDate = today; saveCheckinData(data);
+    var btn = document.getElementById('checkinBtn');
+    if (btn) {
+        var rect = btn.getBoundingClientRect(); var cx = rect.left + rect.width / 2; var cy = rect.top + rect.height / 2;
+        var ring = document.createElement('div'); ring.className = 'stamp-ring'; ring.style.left = (cx - 100) + 'px'; ring.style.top = (cy - 100) + 'px';
+        document.body.appendChild(ring); setTimeout(function(){ ring.remove(); }, 600);
+        var stamp = document.createElement('div'); stamp.className = 'stamp-anim'; stamp.textContent = '\ud83d\udc19';
+        stamp.style.left = (cx - 60) + 'px'; stamp.style.top = (cy - 60) + 'px';
+        document.body.appendChild(stamp); setTimeout(function(){ stamp.remove(); }, 800);
+        spawnConfetti(cx, cy);
+    }
+    renderCheckin();
+}
+function renderCheckin() {
+    var data = getCheckinData(); var today = getTodayStr(); var now = new Date(); var monthPrefix = getMonthStr(now);
+    document.getElementById('streakDays').textContent = data.streak;
+    var monthRecords = data.records.filter(function(r) { return r.indexOf(monthPrefix) === 0; });
+    document.getElementById('monthDays').textContent = monthRecords.length;
+    var done = data.records.indexOf(today) >= 0;
+    var statusEl = document.getElementById('checkinStatus'); var btnEl = document.getElementById('checkinBtn'); var sl = document.getElementById('checkinStampLabel');
+    if (done) {
+        statusEl.textContent = '\ud83d\udc19 爬爬已盖章 \u00b7 棒棒哒！'; statusEl.className = 'checkin-status done';
+        btnEl.textContent = '\ud83d\udc19'; btnEl.className = 'checkin-btn done'; btnEl.disabled = true;
+        if (sl) { sl.textContent = '\u2713 已盖章'; sl.className = 'checkin-stamp-label done'; }
+    } else {
+        statusEl.textContent = '\ud83c\udf31 今日尚未打卡'; statusEl.className = 'checkin-status';
+        btnEl.textContent = '\ud83d\udc19'; btnEl.className = 'checkin-btn'; btnEl.disabled = false; btnEl.onclick = doCheckin;
+        if (sl) { sl.textContent = '\u76d6\u4e2a\u7ae0'; sl.className = 'checkin-stamp-label'; }
+    }
+    renderCalendar(now, data); renderCheckinHistory(data);
+}
+function renderCalendar(now, data) {
+    var year = now.getFullYear(), month = now.getMonth();
+    var firstDay = new Date(year, month, 1), lastDay = new Date(year, month + 1, 0);
+    var cal = document.getElementById('checkinCalendar');
+    var html = '<div style="font-size:14px;font-weight:600;color:#3d3a35;margin-bottom:4px;">' + year + '\u5e74' + (month + 1) + '\u6708</div>';
+    html += '<div class="cal-grid">'; var weekdays = ['\u65e5','\u4e00','\u4e8c','\u4e09','\u56db','\u4e94','\u516d'];
+    for (var w = 0; w < 7; w++) html += '<div class="cal-weekday">' + weekdays[w] + '</div>';
+    for (var e = 0; e < firstDay.getDay(); e++) html += '<div class="cal-day empty"></div>';
+    for (var d = 1; d <= lastDay.getDate(); d++) {
+        var dateObj = new Date(year, month, d); var dateStr = getDateStr(dateObj);
+        var checked = data.records.indexOf(dateStr) >= 0; var isToday = dateStr === getTodayStr();
+        var cls = 'cal-day'; if (checked) cls += ' done'; if (isToday) cls += ' today';
+        html += '<div class="' + cls + '">' + (checked ? '\ud83d\udc19' : d) + '</div>';
+    }
+    html += '</div>'; cal.innerHTML = html;
+}
+function renderCheckinHistory(data) {
+    var list = document.getElementById('checkinHistory');
+    if (data.records.length === 0) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#9a9a8a;font-size:13px;">还没有打卡记录～今天开始吧！</div>'; return; }
+    var recent = data.records.slice(-10).reverse(); var html = '';
+    recent.forEach(function(r) { var parts = r.split('-'); html += '<div class="checkin-record"><span class="date">' + parts[0] + '\u5e74' + parseInt(parts[1]) + '\u6708' + parseInt(parts[2]) + '\u65e5</span><span class="badge">\u2705 \u5df2\u6253\u5361</span></div>'; });
+    list.innerHTML = html;
+}
+function loadState() { try { const s=JSON.parse(localStorage.getItem('challenge_v11')||'{}'); completedIds=new Set(s.completed||[]); quizLearned=new Set(s.quizLearned||[]); favIds=new Set(s.favs||[]); }catch(e){} }
+    function saveState() { try { localStorage.setItem('challenge_v11',JSON.stringify({completed:[...completedIds],quizLearned:[...quizLearned],favs:[...favIds]})); }catch(e){} }
+
+    function pickThree() { const av=ALL_TASKS.filter(t=>!completedIds.has(t.id)); if(av.length===0)return[]; return[...av].sort(()=>Math.random()-0.5).slice(0,3); }
+
+    function renderToday(useCache) {
+      if(!useCache||currentDisplayed.length===0){currentDisplayed=pickThree();}
+      const tasks=currentDisplayed; const c=document.getElementById('todayThree'); c.innerHTML='';
+      if(tasks.length===0){c.innerHTML='<div style="text-align:center;padding:40px;color:#9a9a8a;"><div style="font-size:40px;">🎉</div><div style="font-size:16px;font-weight:600;">全部完成！等爬爬补充新任务～</div></div>';return;}
+      tasks.forEach(t=>{
+        const card=document.createElement('div'); card.className=`today-card type-${t.type}${completedIds.has(t.id)?' done':''}`;
+        card.innerHTML=`<div class="task-check ${completedIds.has(t.id)?'checked':''}" data-task-id="${t.id}">${completedIds.has(t.id)?'✓':''}</div><div class="today-icon ${t.type}-icon">${t.icon}</div><div class="today-body"><div class="today-title">${t.title}</div><div class="today-meta"><span class="today-tag t-${t.type}">${t.tag}</span></div><div class="today-tools">🔧 ${t.tools.join(' · ')}</div></div><div class="today-arrow">›</div>`;
+        // Checkbox click → toggle completion
+        const chk=card.querySelector('.task-check');
+        chk.addEventListener('click',(e)=>{e.stopPropagation();
+          if(completedIds.has(t.id)){completedIds.delete(t.id);chk.classList.remove('checked');chk.textContent='';card.classList.remove('done');}
+          else{completedIds.add(t.id);chk.classList.add('checked');chk.textContent='✓';card.classList.add('done');
+            const rect=chk.getBoundingClientRect();spawnConfetti(rect.left+11,rect.top+11);}
+          saveState();renderCompleted();updateProgress();
+        });
+        // Card click → detail
+        card.addEventListener('click',()=>openDetail(t.id));
+        c.appendChild(card);
+      });
+      renderCompleted();updateProgress();
+    }
+    document.getElementById('refreshBtn').addEventListener('click',()=>{currentDisplayed=[];renderToday(false);});
+
+    function openDetail(id) {
+      const t=ALL_TASKS.find(x=>x.id===id); if(!t)return;
+      document.getElementById('backBtn').style.display='inline-block';
+      document.getElementById('viewPool').classList.remove('active');
+      document.getElementById('viewDetail').classList.add('active');
+      const stepsHtml=t.steps.map(s=>`<li>${s}</li>`).join('');
+      const isDone=completedIds.has(t.id); const chips=t.tools.map(tc=>`<span class="tool-chip">${tc}</span>`).join('');
+      document.getElementById('detailContent').innerHTML=`<div class="detail-card"><div class="detail-title-row"><div class="detail-icon ${t.type}-icon">${t.icon}</div><div><div class="detail-title-text">${t.title}</div><span class="today-tag t-${t.type}" style="margin-top:4px;display:inline-block;">${t.tag}</span></div></div><div class="detail-desc">${t.desc}</div><div class="detail-tools"><div class="detail-tools-title">🔧 推荐工具</div><p>${chips}</p></div><details class="detail-steps"><summary>📋 详细步骤（${t.steps.length} 步）</summary><ol>${stepsHtml}</ol></details><div class="detail-actions"><button class="btn-help" onclick="requestHelp(${t.id})">🐙 需要爬爬协助</button><button class="btn-done ${isDone?'completed':''}" onclick="toggleDone(${t.id},this)">${isDone?'✅ 已完成':'✅ 标记完成'}</button></div><div class="detail-result ${isDone?'show':''}" id="detailResult-${t.id}">🎉 发给我看看成果～</div></div>`;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    document.getElementById('backBtn').addEventListener('click',()=>{
+      document.getElementById('backBtn').style.display='none';
+      document.getElementById('viewDetail').classList.remove('active');
+      document.getElementById('viewPool').classList.add('active');
+      renderToday(true); window.scrollTo({top:0,behavior:'smooth'});
+    });
+    function toggleDone(id,btn){
+      if(completedIds.has(id)){completedIds.delete(id);btn.classList.remove('completed');btn.textContent='✅ 标记完成';}
+      else{completedIds.add(id);btn.classList.add('completed');btn.textContent='✅ 已完成';const rect=btn.getBoundingClientRect();spawnConfetti(rect.left+rect.width/2,rect.top);}
+      const r=document.getElementById('detailResult-'+id);if(r)r.classList.toggle('show',completedIds.has(id));
+      saveState();renderCompleted();updateProgress();
+    }
+    function requestHelp(id){const t=ALL_TASKS.find(x=>x.id===id);const m=document.getElementById('helpModal');const box=document.getElementById('helpCopiedBox');const hint=document.getElementById('helpHint');const btn=document.getElementById('helpCopyBtn');const msg=`🐙 爬爬！我来做任务${t.id}「${t.title}」了，需要你带我走一遍！`;document.getElementById('helpText').textContent=`?? 需要帮忙完成「${t.title}」？`;box.textContent=msg;box.style.display='block';hint.style.display='block';btn.style.display='block';btn.dataset.msg=msg;m.style.display='block';}
+    function copyHelpMsg(){const msg=document.getElementById('helpCopyBtn').dataset.msg;navigator.clipboard.writeText(msg).then(()=>{const hint=document.getElementById('helpHint');hint.textContent='✅ 复制成功！请粘贴到对话框发给爬爬～';setTimeout(()=>{hint.textContent='📋 已复制到剪贴板！请粘贴到对话框发给爬爬～';},3000);});}
+    function renderCompleted(){const s=document.getElementById('completedSection');const l=document.getElementById('completedList');const d=ALL_TASKS.filter(t=>completedIds.has(t.id));document.getElementById('doneCount').textContent=`${d.length}`;if(d.length===0){s.style.display='none';return;}s.style.display='block';l.innerHTML='';d.forEach(t=>{const div=document.createElement('div');div.className='completed-mini';div.innerHTML=`<div class="check-box">✓</div><span>${t.icon} ${t.title}</span>`;l.appendChild(div);});}
+    function updateProgress(){const d=completedIds.size,t=ALL_TASKS.length;document.getElementById('progressFill').style.width=`${t>0?Math.round(d/t*100):0}%`;document.getElementById('progressText').textContent=`已完成 ${d} · 储备 ${t}`;}
+
+    // ====== Quiz ======
+    function pick4Quiz(){const un=QUIZ_BANK.filter(q=>!quizLearned.has(q.id));const pool=un.length>=4?un:[...QUIZ_BANK].sort(()=>Math.random()-0.5);return[...pool].sort(()=>Math.random()-0.5).slice(0,4);}
+
+    function renderQuiz(useCache){
+      if(!useCache||todayQuizIds.length===0){todayQuizIds=pick4Quiz().map(q=>q.id);}
+      const today=QUIZ_BANK.filter(q=>todayQuizIds.includes(q.id));
+      const list=document.getElementById('quizList');list.innerHTML='';
+      today.forEach(q=>{
+        const card=document.createElement('div');
+        card.className=`quiz-card ${q.tagClass==='qt-data'?'data-q':'strategy-q'}${quizLearned.has(q.id)?' done':''}`;
+        const isFav=favIds.has(q.id);
+        card.innerHTML=`<span class="bookmark-star ${isFav?'active':''}" data-qid="${q.id}">${isFav?'★':'☆'}</span><div class="quiz-q"><span class="quiz-badge ${q.badgeClass}">${q.badge}</span><span>${q.q}</span></div><span class="quiz-tag-sm ${q.tagClass}">${q.tag}</span><div class="quiz-answer"><div class="quiz-answer-inner">${q.a}</div></div><div class="quiz-btns"><button class="quiz-view-btn">📖 查看答案</button><button class="quiz-done-btn" data-qid="${q.id}">✅ 完成</button></div>`;
+        // Bookmark toggle
+        const star=card.querySelector('.bookmark-star');
+        star.addEventListener('click',(e)=>{e.stopPropagation();
+          if(favIds.has(q.id)){favIds.delete(q.id);star.classList.remove('active');star.textContent='☆';}
+          else{favIds.add(q.id);star.classList.add('active');star.textContent='★';}
+          saveState();
+        });
+        // View answer button
+        var viewBtn = card.querySelector('.quiz-view-btn');
+        if (viewBtn) {
+          viewBtn.addEventListener('click',function(e){e.stopPropagation();
+            card.classList.toggle('expanded');
+            this.textContent=card.classList.contains('expanded')?'📖 收起答案':'📖 查看答案';
+          });
+        }
+        // Done button handler
+        var doneBtn = card.querySelector('.quiz-done-btn');
+        if (doneBtn) {
+          doneBtn.addEventListener('click',function(e){e.stopPropagation();
+            if(!quizLearned.has(q.id)){quizLearned.add(q.id);card.classList.add('done');saveState();updateQuizProgress();}
+            this.textContent='✅ 已学习';this.disabled=true;this.style.opacity='0.6';this.style.cursor='default';
+          });
+        }
+        list.appendChild(card);
+      });
+      updateQuizProgress();
+    }
+
+    function updateQuizProgress(){const d=quizLearned.size,t=QUIZ_BANK.length;document.getElementById('quizProgressFill').style.width=`${Math.round(d/t*100)}%`;document.getElementById('quizProgressText').textContent=`已学 ${d}/${t}`;}
+    document.getElementById('quizRefreshBtn').addEventListener('click',()=>{todayQuizIds=[];renderQuiz(false);});
+
+    function renderKnowledges(){var l=document.getElementById('knowledgeList');l.innerHTML='';KNOWLEDGES.forEach(function(k){var c=document.createElement('div');c.className='knowledge-card';var html='<div class="k-term">📖 '+k.term+'</div><div class="k-body">'+k.body+'</div>';if(k.example){html+='<div class="k-example">'+k.example+'</div>';}c.innerHTML=html;l.appendChild(c);});}
+
+    // ====== Favorites Modal ======
+    function openFavModal(){
+      const favd=QUIZ_BANK.filter(q=>favIds.has(q.id));
+      document.getElementById('modalTitle').textContent=`⭐ 收藏夹（${favd.length}道）`;
+      document.getElementById('modalOverlay').classList.add('show');
+      document.getElementById('modalBox').classList.add('show');
+      const list=document.getElementById('modalQuizList');list.innerHTML='';
+      if(favd.length===0){list.innerHTML='<div style="text-align:center;padding:30px;color:#9a9a8a;">还没有收藏的题目～在题目右上角点☆收藏</div>';return;}
+      favd.forEach(q=>{
+        const div=document.createElement('div');div.className='modal-quiz-item';
+        div.innerHTML=`<div class="modal-q-num ${q.badgeClass==='db'?'md-data':'md-strategy'}">${q.id}</div><div class="modal-q-text">${q.q}</div><div class="modal-q-star faved">★</div>`;
+        list.appendChild(div);
+      });
+    }
+
+    document.getElementById('favBtn').addEventListener('click',openFavModal);
+    document.getElementById('viewAllBtn').addEventListener('click',()=>{
+      document.getElementById('modalTitle').textContent='📖 全部题库（40道）';
+      document.getElementById('modalOverlay').classList.add('show');
+      document.getElementById('modalBox').classList.add('show');
+      const list=document.getElementById('modalQuizList');list.innerHTML='';
+      QUIZ_BANK.forEach(q=>{
+        const div=document.createElement('div');div.className='modal-quiz-item';
+        const favd=favIds.has(q.id);
+        div.innerHTML=`<div class="modal-q-num ${q.badgeClass==='db'?'md-data':'md-strategy'}">${q.id}</div><div class="modal-q-text">${q.q}</div><div class="modal-q-star ${favd?'faved':''}">${favd?'★':'☆'}</div>`;
+        list.appendChild(div);
+      });
+    });
+    document.getElementById('modalCloseBtn').addEventListener('click',()=>{document.getElementById('modalOverlay').classList.remove('show');document.getElementById('modalBox').classList.remove('show');});
+    document.getElementById('modalOverlay').addEventListener('click',()=>{document.getElementById('modalOverlay').classList.remove('show');document.getElementById('modalBox').classList.remove('show');});
+
+    document.querySelectorAll('.tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+btn.dataset.tab).classList.add('active');});});
+
+    const dn=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+    setTimeout(()=>{const p=document.getElementById('viewPool');if(p)p.insertAdjacentHTML('beforeend',`<div class="section-title" style="margin-top:20px;">💡 爬爬小贴士</div><div class="tip-card"><div class="tip-body">${tips[dn%tips.length]}</div></div>`);},100);
+
+    loadState(); quizLearned=new Set(); saveState(); renderToday(true); renderQuiz(true); renderKnowledges(); renderCheckin();
+  </script>
+</body>
+</html>
