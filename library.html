@@ -375,6 +375,23 @@ function loadDefaults(){
     {id:708,icon:'📚',cat:'book',title:'《思考，快与慢》',content:'Daniel Kahneman。系统1(快思考占90%决策)和系统2(慢思考)。理解用户不理性的决策方式，做更好的运营设计。',notes:'',fav:false,time:Date.now()-864e5*6},
     {id:709,icon:'📚',cat:'book',title:'《行为设计学》',content:'Chip Heath。小改变→放大的→容易做→有动力。适合做用户行为和运营流程设计。',notes:'',fav:false,time:Date.now()-864e5*6},
     {id:710,icon:'📚',cat:'book',title:'《俞军产品方法论》',content:'产品价值=(新体验-旧体验)-替换成本。交易模型+用户模型是产品核心能力。产品和运营一起读效果更好。',notes:'',fav:false,time:Date.now()-864e5*6},
+
+    // ====== 📖 新增：运营概念（买量指标/运营工具）======
+    {id:801,icon:'📖',cat:'concept',title:'CPI（每次安装成本）',content:'Cost Per Install，按安装计费。手游买量最常用的计费方式。用户点击广告并完成安装就算一次计费。适合以获取新用户为目标的买量推广。价格：休闲$0.5-3、中度$3-8、重度$8-30+。优化方法：优化素材吸引精准用户、筛选优质渠道、提升广告到安装的转化率。注意：刷量问题——只看安装不算激活，需配合落地页数据。',notes:'',fav:false,time:Date.now()},
+    {id:802,icon:'📖',cat:'concept',title:'CPA（每次行动成本）',content:'Cost Per Action，按用户完成指定行动计费。行动可以是注册、付费、加心愿单等。对广告主最友好（只对有效行动付费），但单价最高。eCPA=总花费÷有效行动数。游戏运营常用CPA考核：注册CPA、付费CPA、加群CPA。注意：CPA过低可能是无效流量，过高则ROAS不达标。',notes:'',fav:false,time:Date.now()},
+    {id:803,icon:'📖',cat:'concept',title:'CPC（每次点击成本）',content:'Cost Per Click，按点击计费。广告被点击一次收一次费。买量和品牌推广中最常见的计费方式之一。CTR（点击率）直接影响CPC成本——CTR越高单次CPC越低。抖音信息流CPC约$0.1-0.5、微信朋友圈$0.5-2。CPC适合品牌曝光和精准引流，不适合纯粹求量的买量场景。',notes:'',fav:false,time:Date.now()},
+    {id:804,icon:'📖',cat:'concept',title:'CPM（千次展示成本）',content:'Cost Per Mille，每千次展示费用。品牌广告中最常用的计费方式。不管用户点不点击，只要看到1000次就收1000次的钱。适合品牌曝光、新品发布、大型活动预热。游戏行业CPM参考：信息流约$5-15、开屏$15-50。CPM不能只看单价，要看千次展示带来的后续转化。',notes:'',fav:false,time:Date.now()},
+    {id:805,icon:'📖',cat:'concept',title:'eCPM（千次展示有效收入）',content:'effective CPM，广告每千次展示产生的实际收入。计算公式：eCPM=广告收入÷展示次数×1000。衡量广告变现效率的核心指标，越高说明你的用户越值钱。激励视频eCPM $10-30、插屏$5-15、Banner $1-5。影响eCPM的因素：用户地区（欧美>亚洲>其他）、用户质量、广告类型、广告填充率。',notes:'',fav:false,time:Date.now()},
+    {id:806,icon:'📖',cat:'concept',title:'CTR（点击率）',content:'Click Through Rate，广告或链接被点击的比例。公式：点击次数÷展示次数×100%。衡量广告素材和投放效果的关键指标。行业平均CTR 1-5%。影响CTR的因素：素材创意（视频>图片）、文案吸引力、投放位置（首位>中部>底部）、目标人群精准度。CTR不是越高越好——CTR过高可能是素材标题党，实际转化不一定好。',notes:'',fav:false,time:Date.now()},
+    {id:807,icon:'📖',cat:'concept',title:'CVR（转化率）',content:'Conversion Rate，用户完成目标行为的比例。常见转化：注册转化率（点击广告→注册成功）、付费转化率（进入付费页→完成支付）、活动参与率（看到活动→参与活动）。提升CVR的核心方法：降低用户操作步骤（每多一步流失20-30%）、清晰的引导文案、减少干扰元素、加载速度优化（每慢1秒降7%转化）。',notes:'',fav:false,time:Date.now()},
+    {id:808,icon:'📖',cat:'concept',title:'Push推送运营',content:'向用户设备发送通知消息。类型：运营推送（活动/福利）、版本推送（更新预告/新内容）、个性化推送（根据用户行为推荐）、自动化推送（流失预警/回归引导）。关键指标：送达率（iOS>90%安卓约80%）、打开率（行业平均10-20%优质可达30%+）、点击转化率。Push禁忌：太频繁导致用户关闭通知、无价值内容、不分时段推送。最佳频率：一天1-3条。',notes:'',fav:false,time:Date.now()},
+    {id:809,icon:'📖',cat:'concept',title:'埋点',content:'在代码中预设数据采集点，记录用户行为数据。类型：事件埋点（用户做了什么：点击按钮/进入页面/完成付费）、页面埋点（用户看了什么页面/停留多久）、用户属性埋点（性别/等级/付费金额）。常用工具：Firebase/ThinkingData/SensorsAnalytics/GrowingIO。埋点是数据驱动的基础——没有埋点就像闭着眼睛开车，出了问题也不知道是哪个环节。',notes:'',fav:false,time:Date.now()},
+    {id:810,icon:'📖',cat:'concept',title:'灰度发布',content:'新功能或版本先给小比例用户测试，验证没问题再全量开放。典型比例：5%→20%→50%→100%。每阶段观察核心指标（留存/付费/闪退率），发现问题及时回滚。好处：问题只影响小部分用户、可以做A/B对比验证效果、降低重大事故风险。运营的关注点：灰度用户分组是否合理、灰度期数据与基准线的差异、用户反馈收集。',notes:'',fav:false,time:Date.now()},
+    {id:811,icon:'📖',cat:'concept',title:'社交裂变',content:'利用用户社交关系链实现自传播增长。核心公式：分享率×分享转化率=K因子（>1时可以用户带用户，无需买量）。常见形式：拼团（3人成团享折扣）/助力（好友帮忙砍价）/分享得奖励（分享领体力/抽奖机会）。设计要点：奖励有真实价值但不破坏平衡、分享流程极简（一步完成）、分享内容有社交货币（让用户愿意分享）。',notes:'',fav:false,time:Date.now()},
+    {id:812,icon:'📖',cat:'concept',title:'素材运营',content:'买量和运营推广中使用的广告创意物料。类型：视频素材（15-30秒，效果最好）、图片素材（单图/轮播/多图）、文案素材（标题+描述）。素材是买量的核心——好素材可以降低50%以上CPA。更新频率：每周至少2-3组新素材，素材衰退周期约2-4周。运营需要关注：点击率CTR（素材吸不吸引人）、转化率CVR（素材能不能带来有效用户）、两者平衡。',notes:'',fav:false,time:Date.now()},
+    {id:813,icon:'📖',cat:'concept',title:'用户召回运营',content:'针对已流失或即将流失用户的运营策略。召回目标用户：30天未登录的用户为「冷召回」、7-30天未登录为「温召回」、3-7天未活跃为「活跃预警」。核心手段：Push推送（打开率10-20%）、短信（打开率3-8%）、邮件、社交渠道、回归福利。关键指标：召回率（召回用户÷触达用户）、召回用户7日留存、召回用户付费率。注意不要过度召回——频繁骚扰会让用户更反感。',notes:'',fav:false,time:Date.now()},
+    {id:814,icon:'📊',cat:'data',title:'各渠道买量CPC/CPA参考',content:'抖音信息流：CPC约$0.1-0.3 / CPA约$2-8（国内安卓）。微信朋友圈：CPC约$0.5-1.5 / CPA约$5-20。B站：CPC约$0.2-0.5 / CPA约$3-12。Google Ads海外：CPC约$0.3-1 / CPA约$3-15。Apple Search Ads：CPC约$0.5-2 / CPA约$5-25。注意不同品类差异大：休闲/超休闲CPA低（$0.5-3），重度SLG/MMO高（$10-40+）。建议小预算测试后放量。',notes:'',fav:false,time:Date.now()},
+    {id:815,icon:'🛠️',cat:'tool',title:'数据看板搭建指南',content:'运营日常数据监控最核心的工具。必备看板：①DAU/新增/MAU趋势图 ②留存曲线（次日/7日/30日）③付费漏斗（浏览→点击→付费）④LTV/CAC对比 ⑤活动数据实时监控。工具推荐：Tableau/DataStudio/FineBI（免费） / SensorsAnalytics（增长版）。关键原则：先关注趋势变化（升降幅超过10%要马上看原因）、不要只看数据要关联动作（做了什么改版导致数据变化）。',notes:'',fav:false,time:Date.now()},
   ];
   // 自动关联知识（增强版）：内容匹配 + 同分类关联 + 标题层级关联
   const kwMap = {};
