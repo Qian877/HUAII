@@ -247,14 +247,34 @@ const CAT_SHORT = {concept:'📖 运营',data:'📊 数据',case:'💡 案例',t
 // ====== Init ======
 function init(){
   const saved = localStorage.getItem('huaiLibrary');
-  if(saved){library = JSON.parse(saved);}else{loadDefaults();}
+  if(saved){
+    library = JSON.parse(saved);
+    // 数据迁移：把 loadDefaults 里的新条目补进去
+    const defaultData = getDefaultData();
+    let migrated = false;
+    const existingIds = new Set(library.map(i=>i.id));
+    defaultData.forEach(def=>{
+      if(!existingIds.has(def.id)){
+        library.push(def);
+        migrated = true;
+      }
+    });
+    // 给没有 links 的条目运行自动关联
+    const needsLinks = library.some(i=>!i.links);
+    if(needsLinks){
+      runAutoLink();
+      migrated = true;
+    }
+    if(migrated) save();
+  } else {
+    loadDefaults();
+  }
   renderEmojiGrid();
   updateHeroDate();
   render();
 }
 
-function loadDefaults(){
-  library = [
+function getDefaultData(){return [
     // ====== 📖 运营概念 (36条) ======
     {id:1,icon:'📖',cat:'concept',title:'DAU（日活跃用户）',content:'Daily Active Users，一天内登录游戏的独立用户数量。衡量产品规模的核心指标。健康游戏关注DAU趋势：工作日比周末低10-20%，版本更新日有波动，活动期间有短期高峰。DAU/MAU比值可衡量粘性，0.2-0.5正常。',notes:'',fav:false,time:Date.now()-864e5*1},
     {id:2,icon:'📖',cat:'concept',title:'MAU（月活跃用户）',content:'Monthly Active Users，一个月内登录游戏的独立用户数量。DAU/MAU叫用户粘性指标（Stickiness），健康游戏20%-40%。低于20%说明用户只是偶尔打开，需要加强日常运营。',notes:'',fav:false,time:Date.now()-864e5*2},
@@ -393,17 +413,17 @@ function loadDefaults(){
     {id:814,icon:'📊',cat:'data',title:'各渠道买量CPC/CPA参考',content:'抖音信息流：CPC约$0.1-0.3 / CPA约$2-8（国内安卓）。微信朋友圈：CPC约$0.5-1.5 / CPA约$5-20。B站：CPC约$0.2-0.5 / CPA约$3-12。Google Ads海外：CPC约$0.3-1 / CPA约$3-15。Apple Search Ads：CPC约$0.5-2 / CPA约$5-25。注意不同品类差异大：休闲/超休闲CPA低（$0.5-3），重度SLG/MMO高（$10-40+）。建议小预算测试后放量。',notes:'',fav:false,time:Date.now()},
     {id:815,icon:'🛠️',cat:'tool',title:'数据看板搭建指南',content:'运营日常数据监控最核心的工具。必备看板：①DAU/新增/MAU趋势图 ②留存曲线（次日/7日/30日）③付费漏斗（浏览→点击→付费）④LTV/CAC对比 ⑤活动数据实时监控。工具推荐：Tableau/DataStudio/FineBI（免费） / SensorsAnalytics（增长版）。关键原则：先关注趋势变化（升降幅超过10%要马上看原因）、不要只看数据要关联动作（做了什么改版导致数据变化）。',notes:'',fav:false,time:Date.now()},
   ];
-  // 自动关联知识（增强版）：内容匹配 + 同分类关联 + 标题层级关联
+}
+
+function runAutoLink(){
   const kwMap = {};
   library.forEach(i=>{
     const m = i.title.match(/^([^（(]+)/);
     kwMap[m?m[1].trim():i.title] = {title:i.title, cat:i.cat};
   });
-  // 按关键词长度降序排序（长关键词优先匹配，避免短词覆盖）
   const sortedKw = Object.keys(kwMap).sort((a,b)=>b.length-a.length);
   library.forEach(item=>{
     if(!item.links) item.links = [];
-    // 1. 内容关键词匹配
     sortedKw.forEach(kw=>{
       const info = kwMap[kw];
       if(info.title===item.title) return;
@@ -411,7 +431,6 @@ function loadDefaults(){
         if(!item.links.includes(kw)) item.links.push(kw);
       }
     });
-    // 2. 同分类关联（同分类其他条目标题中出现的关键词）
     library.forEach(other=>{
       if(other.id===item.id) return;
       if(other.cat===item.cat){
@@ -424,13 +443,14 @@ function loadDefaults(){
         });
       }
     });
-    // 3. 去重，限制最多20个
     item.links = [...new Set(item.links)].slice(0,20);
   });
-  // 保存所有关键词列表用于正文高亮
   window._libraryKeywords = sortedKw;
   save();
-  save();
+}
+function loadDefaults(){
+  library = getDefaultData();
+  runAutoLink();
 }
 
 function save(){localStorage.setItem('huaiLibrary',JSON.stringify(library));}
