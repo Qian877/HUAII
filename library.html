@@ -103,6 +103,23 @@ body{
 .dialog-notes{width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:8px;font-size:13px;outline:none;color:rgba(255,255,255,0.7);resize:none;min-height:60px;font-family:inherit;margin-bottom:4px;line-height:1.5;}
 .dialog-notes:focus{border-color:#f48fb1;}
 .dialog-notes::placeholder{color:rgba(255,255,255,0.2);}
+/* ===== 联动知识 ===== */
+.links-section{margin:12px 0 10px;}
+.links-title{font-size:11px;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:8px;line-height:1;letter-spacing:2px;}
+.links-wrap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.link-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:999px;background:rgba(244,143,177,0.1);border:1px solid rgba(244,143,177,0.2);color:#f48fb1;font-size:12px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.link-tag:hover{background:rgba(244,143,177,0.2);border-color:#f48fb1;transform:translateY(-1px);}
+.link-tag.missing{color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1);}
+.link-tag.missing:hover{color:#f48fb1;border-color:rgba(244,143,177,0.3);background:rgba(244,143,177,0.08);}
+.new-links-area{margin-bottom:14px;}
+.new-links-area label{display:block;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
+.new-links-hint{font-size:10px;color:rgba(255,255,255,0.2);margin-top:3px;}
+.new-links-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.new-link-remove{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:none;background:rgba(244,143,177,0.3);color:#fff;font-size:9px;cursor:pointer;line-height:1;padding:0;margin-left:2px;}
+.new-link-remove:hover{background:#f48fb1;}
+#newLinksInput{width:100%;padding:8px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:6px;font-size:13px;outline:none;color:rgba(255,255,255,0.7);font-family:inherit;}
+#newLinksInput:focus{border-color:#f48fb1;}
+#newLinksInput::placeholder{color:rgba(255,255,255,0.2);}
 
 /* ===== 新建条目弹窗 ===== */
 .new-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:40;justify-content:center;align-items:center;padding:20px;}
@@ -174,6 +191,10 @@ body{
     </div>
     <div class="dialog-date" id="dlgDate">2026/5/20</div>
     <div class="dialog-content" id="dlgContent">内容</div>
+    <div class="links-section" id="linksSection" style="display:none">
+      <div class="links-title">📌 联动知识</div>
+      <div class="links-wrap" id="linksWrap"></div>
+    </div>
     <div class="dialog-notes-label">── 补充笔记 ──</div>
     <textarea class="dialog-notes" id="dlgNotes" placeholder="在这里补充笔记…" oninput="saveNotes()"></textarea>
   </div>
@@ -197,6 +218,12 @@ body{
       <option value="tool">🛠️ AI工具</option>
       <option value="diary">📝 学习日记</option>
     </select>
+    <div class="new-links-area">
+      <label>📌 联动知识</label>
+      <div class="new-links-tags" id="newLinksTags"></div>
+      <input type="text" id="newLinksInput" placeholder="输入关联关键词，回车添加…" onkeydown="addLinkTag(event)">
+      <div class="new-links-hint">💡 输入关键词后按回车添加，点击标签旁的 ✕ 可删除</div>
+    </div>
     <div class="new-actions">
       <button class="new-btn cancel" onclick="closeNewDialog()">取消</button>
       <button class="new-btn save" onclick="saveNewEntry()">保存</button>
@@ -346,6 +373,22 @@ function loadDefaults(){
     {id:709,icon:'📚',cat:'book',title:'《行为设计学》',content:'Chip Heath。小改变→放大的→容易做→有动力。适合做用户行为和运营流程设计。',notes:'',fav:false,time:Date.now()-864e5*6},
     {id:710,icon:'📚',cat:'book',title:'《俞军产品方法论》',content:'产品价值=(新体验-旧体验)-替换成本。交易模型+用户模型是产品核心能力。产品和运营一起读效果更好。',notes:'',fav:false,time:Date.now()-864e5*6},
   ];
+  // 自动关联知识：扫描所有条目内容中的关键词，自动建立links
+  const kwMap = {};
+  library.forEach(i=>{
+    const m = i.title.match(/^([^（(]+)/);
+    kwMap[m?m[1].trim():i.title] = i.title;
+  });
+  library.forEach(item=>{
+    if(!item.links) item.links = [];
+    Object.entries(kwMap).forEach(([kw,title])=>{
+      if(title===item.title) return;
+      if(item.content.includes(kw)||item.content.includes(title)){
+        if(!item.links.includes(kw)) item.links.push(kw);
+      }
+    });
+    item.links = item.links.slice(0,10);
+  });
   save();
 }
 
@@ -486,6 +529,7 @@ function openDetail(id){
   const fav = document.getElementById('dlgFavBtn');
   fav.textContent = i.fav?'★':'☆';
   fav.classList.toggle('faved',!!i.fav);
+  renderLinks(i);
   document.getElementById('detailOverlay').classList.add('show');
 }
 
@@ -524,6 +568,9 @@ function editEntry(){
     document.getElementById('newCat').value = i.cat;
     selectedEmoji = i.icon||'📝';
     renderEmojiGrid();
+    // Load links for editing
+    editingLinks = (i.links||[]).slice();
+    renderLinkTags();
     document.getElementById('newOverlay').classList.add('show');
     // Mark as editing
     document.getElementById('newOverlay').dataset.edit = currentItemId;
@@ -537,6 +584,47 @@ function deleteEntry(){
 }
 
 // ====== New Entry Dialog ======
+let editingLinks = [];
+
+// ====== 联动知识 ======
+function addLinkTag(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const input = document.getElementById('newLinksInput');
+  const kw = input.value.trim();
+  if(!kw)return;
+  if(editingLinks.includes(kw)){input.value='';return;}
+  editingLinks.push(kw);
+  input.value='';
+  renderLinkTags();
+}
+function removeLinkTag(kw){
+  editingLinks = editingLinks.filter(x=>x!==kw);
+  renderLinkTags();
+}
+function renderLinkTags(){
+  const wrap = document.getElementById('newLinksTags');
+  if(!editingLinks.length){wrap.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.2)">暂无联动知识，在上方输入添加</span>';return;}
+  wrap.innerHTML = editingLinks.map(kw=>
+    `<span class="link-tag" style="cursor:default;font-size:11px;padding:3px 8px;">${kw}<button class="new-link-remove" onclick="removeLinkTag('${kw.replace(/'/g,"\\'")}')">✕</button></span>`
+  ).join('');
+}
+function renderLinks(item){
+  const section = document.getElementById('linksSection');
+  const wrap = document.getElementById('linksWrap');
+  const links = item.links||[];
+  if(!links.length){section.style.display='none';return;}
+  section.style.display='block';
+  wrap.innerHTML = links.map(kw=>{
+    const target = library.find(i=>i.title===kw || i.title.startsWith(kw+'（'));
+    if(target){
+      return `<span class="link-tag" onclick="closeDialog();setTimeout(()=>openDetail(${target.id}),100)" title="${target.icon||'📝'} ${target.title}">${target.icon||'📝'} ${kw}</span>`;
+    } else {
+      return `<span class="link-tag missing" onclick="closeDialog();setTimeout(()=>{document.getElementById('newTitle').value='${kw.replace(/'/g,"\\'")}';document.getElementById('newContent').focus();document.getElementById('newOverlay').classList.add('show');renderEmojiGrid();},100)" title="点击创建「${kw}」">➕ ${kw}</span>`;
+    }
+  }).join('');
+}
+
 function renderEmojiGrid(){
   const g=document.getElementById('emojiGrid');
   g.innerHTML=EMOJIS.map(e=>`<button class="new-emoji-btn${e===selectedEmoji?' selected':''}" onclick="event.preventDefault();selectEmoji('${e}')">${e}</button>`).join('');
@@ -549,11 +637,13 @@ function openNewDialog(){
   document.getElementById('newContent').value='';
   document.getElementById('newCat').value='concept';
   selectedEmoji='📝';
+  editingLinks=[];
+  renderLinkTags();
   renderEmojiGrid();
   document.getElementById('newOverlay').classList.add('show');
 }
 
-function closeNewDialog(){document.getElementById('newOverlay').classList.remove('show');}
+function closeNewDialog(){document.getElementById('newOverlay').classList.remove('show');editingLinks=[];}
 
 function saveNewEntry(){
   const title = document.getElementById('newTitle').value.trim();
@@ -562,9 +652,9 @@ function saveNewEntry(){
   const editId = document.getElementById('newOverlay').dataset.edit;
   if(editId){
     const i = library.find(x=>x.id==parseInt(editId));
-    if(i){i.title=title;i.content=content;i.cat=document.getElementById('newCat').value;i.icon=selectedEmoji;save();}
+    if(i){i.title=title;i.content=content;i.cat=document.getElementById('newCat').value;i.icon=selectedEmoji;i.links=editingLinks.slice();save();}
   } else {
-    library.push({id:Date.now(),icon:selectedEmoji,cat:document.getElementById('newCat').value,title,content,notes:'',fav:false,time:Date.now()});
+    library.push({id:Date.now(),icon:selectedEmoji,cat:document.getElementById('newCat').value,title,content,notes:'',links:editingLinks.slice(),fav:false,time:Date.now()});
     save();
   }
   closeNewDialog();render();
