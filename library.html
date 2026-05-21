@@ -26,9 +26,10 @@ body{
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
 
 /* ===== Sticky 导航栏 ===== */
-.nav-bar{position:sticky;top:0;z-index:10;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px 40px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.nav-bar{position:sticky;top:0;z-index:10;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .nav-bar::-webkit-scrollbar{display:none;}
-.nav-back{display:flex;align-items:center;gap:4px;padding:4px 10px;border:none;background:none;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;white-space:nowrap;border-radius:999px;transition:all 0.2s;position:absolute;left:40px;}
+.nav-inner{display:flex;align-items:center;gap:6px;margin:0 auto;flex-shrink:0;}
+.nav-back{display:flex;align-items:center;gap:4px;padding:4px 10px;border:none;background:none;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;white-space:nowrap;border-radius:999px;transition:all 0.2s;flex-shrink:0;}
 .nav-back:hover{background:rgba(244,143,177,0.12);color:#f48fb1;}
 .nav-tab{padding:6px 16px;border-radius:999px;font-size:13px;cursor:pointer;border:none;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
 .nav-tab:hover{background:rgba(244,143,177,0.12);color:rgba(255,255,255,0.9);}
@@ -161,6 +162,7 @@ body{
 <!-- ===== Sticky 导航栏 ===== -->
 <nav class="nav-bar" id="navBar">
   <button class="nav-back" id="navBack" onclick="goBack()" style="display:none;">← 全部</button>
+  <div class="nav-inner">
   <button class="nav-tab active" data-tab="all" onclick="switchView('all',this)">📋 全部</button>
   <button class="nav-tab" data-tab="concept" onclick="switchView('concept',this)">📖 运营</button>
   <button class="nav-tab" data-tab="data" onclick="switchView('data',this)">📊 数据</button>
@@ -172,6 +174,7 @@ body{
   <button class="nav-tab" data-tab="book" onclick="switchView('book',this)">📚 书单</button>
   <button class="nav-tab" data-tab="slang" onclick="switchView('slang',this)">🎯 黑话</button>
   <button class="nav-tab" data-tab="favorites" onclick="switchView('favorites',this)">⭐ 收藏</button>
+  </div>
 </nav>
 
 <!-- ===== 书架区 ===== -->
