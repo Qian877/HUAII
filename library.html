@@ -170,6 +170,7 @@ body{
   <button class="nav-tab" data-tab="product" onclick="switchView('product',this)">📈 产品</button>
   <button class="nav-tab" data-tab="industry" onclick="switchView('industry',this)">🌐 行业</button>
   <button class="nav-tab" data-tab="book" onclick="switchView('book',this)">📚 书单</button>
+  <button class="nav-tab" data-tab="slang" onclick="switchView('slang',this)">🎯 黑话</button>
   <button class="nav-tab" data-tab="favorites" onclick="switchView('favorites',this)">⭐ 收藏</button>
 </nav>
 
@@ -242,7 +243,7 @@ let currentItemId = null;
 let selectedEmoji = '📝';
 const EMOJIS = ['📝','💡','🔥','⭐','📌','🎯','⚡','🔧','🧠','📊','🎮','🛠️','📖','💻','🤖','✨'];
 const CAT_NAMES = {concept:'📖 运营概念',data:'📊 行业数据',case:'💡 经典案例',tool:'🛠️ 效率工具',game:'🎮 游戏运营',product:'📈 产品运营',industry:'🌐 行业知识',book:'📚 推荐书单',slang:'🎯 行业黑话',diary:'📝 学习日记'};
-const CAT_SHORT = {concept:'📖 运营',data:'📊 数据',case:'💡 案例',tool:'🛠️ AI',diary:'📝 日记'};
+const CAT_SHORT = {concept:'📖 运营',data:'📊 数据',case:'💡 案例',tool:'🛠️ AI',game:'🎮 游戏',product:'📈 产品',industry:'🌐 行业',book:'📚 书单',slang:'🎯 黑话',diary:'📝 日记'};
 
 // ====== Init ======
 function init(){
@@ -412,8 +413,28 @@ function getDefaultData(){return [
     {id:813,icon:'📖',cat:'concept',title:'用户召回运营',content:'针对已流失或即将流失用户的运营策略。召回目标用户：30天未登录的用户为「冷召回」、7-30天未登录为「温召回」、3-7天未活跃为「活跃预警」。核心手段：Push推送（打开率10-20%）、短信（打开率3-8%）、邮件、社交渠道、回归福利。关键指标：召回率（召回用户÷触达用户）、召回用户7日留存、召回用户付费率。注意不要过度召回——频繁骚扰会让用户更反感。',notes:'',fav:false,time:Date.now()},
     {id:814,icon:'📊',cat:'data',title:'各渠道买量CPC/CPA参考',content:'抖音信息流：CPC约$0.1-0.3 / CPA约$2-8（国内安卓）。微信朋友圈：CPC约$0.5-1.5 / CPA约$5-20。B站：CPC约$0.2-0.5 / CPA约$3-12。Google Ads海外：CPC约$0.3-1 / CPA约$3-15。Apple Search Ads：CPC约$0.5-2 / CPA约$5-25。注意不同品类差异大：休闲/超休闲CPA低（$0.5-3），重度SLG/MMO高（$10-40+）。建议小预算测试后放量。',notes:'',fav:false,time:Date.now()},
     {id:815,icon:'🛠️',cat:'tool',title:'数据看板搭建指南',content:'运营日常数据监控最核心的工具。必备看板：①DAU/新增/MAU趋势图 ②留存曲线（次日/7日/30日）③付费漏斗（浏览→点击→付费）④LTV/CAC对比 ⑤活动数据实时监控。工具推荐：Tableau/DataStudio/FineBI（免费） / SensorsAnalytics（增长版）。关键原则：先关注趋势变化（升降幅超过10%要马上看原因）、不要只看数据要关联动作（做了什么改版导致数据变化）。',notes:'',fav:false,time:Date.now()},
-  ];
-}
+
+    // ====== 🎯 行业黑话（15条）======
+    {id:901,icon:'🎯',cat:'slang',title:'大R/中R/小R/非R',content:'游戏行业的用户付费分层体系。大R（鲸鱼用户）：月付费$500+，占收入50-70%，人数最少但贡献最大，需要1对1服务。中R：月付费$50-500，占收入20-30%，是付费中坚力量。小R：月付费$5-50，占收入10-15%，靠性价比礼包转化。非R：不付费，靠广告变现或作为活跃用户服务大R。运营策略：大R重服务、中R重活动、小R重性价比、非R重活跃不强行付费。',notes:'',fav:false,time:Date.now()},
+    {id:902,icon:'🎯',cat:'slang',title:'氪金/肝/欧皇/非酋',content:'玩家圈四大通俗文化用语。氪金：花钱玩游戏的通俗说法（源自"课金"日语转写），形容付费行为。肝：需要投入大量时间精力，通常指重复性高耗时的游戏内容。欧皇：抽卡运气好的玩家（运气爆棚像欧洲皇室），获取稀有角色/装备。非酋：抽卡运气差的玩家（脸黑像非洲酋长），常常吃满保底。运营要理解并合理利用这些文化——比如在社区中使用这些语言拉近距离，设计活动让非酋至少保底，维护欧皇的炫耀感。',notes:'',fav:false,time:Date.now()},
+    {id:903,icon:'🎯',cat:'slang',title:'SDK/API（技术常识）',content:'运营需要了解的基础技术概念。SDK（Software Development Kit）：软件开发工具包，第三方服务接入游戏的代码包。常见SDK：登录SDK（微信/QQ）、支付SDK（微信/支付宝/苹果支付）、推送SDK、数据SDK（埋点）。API（Application Programming Interface）：应用程序接口，系统之间通讯的约定。运营常用API：获取游戏数据、发送推送、查询用户信息。不懂这两个词，跟研发沟通会很困难。',notes:'',fav:false,time:Date.now()},
+    {id:904,icon:'🎯',cat:'slang',title:'OKR/KPI（目标管理）',content:'OKR（Objectives and Key Results）：目标和关键结果。定一个有挑战的目标（O）+ 3-5个可衡量的结果（KR）。例如O：提升游戏用户粘性，KR1：7日留存从25%提升到30%，KR2：日均时长从30分钟提到40分钟。OKR偏激励，完成70%就算好。KPI（Key Performance Indicator）：关键绩效指标，和考核挂钩一定要完成的数字。运营岗位常见KPI：DAU/留存/付费率/LTV。OKR定方向，KPI保底线。',notes:'',fav:false,time:Date.now()},
+    {id:905,icon:'🎯',cat:'slang',title:'MVP（最小可行产品）',content:'Minimum Viable Product，用最小成本做出能验证核心假设的产品版本。核心思想：先做最核心的功能上线测试，收集数据再迭代，避免花了几个月做出没人要的东西。游戏领域MVP：先做一个核心玩法原型测试留存，留存达标再做系统/活动/社交。运营的MVP思维：活动先小规模测效果再全量、新功能先灰度再全开。经典反面案例：花半年做的功能上线发现用户根本不关心。',notes:'',fav:false,time:Date.now()},
+    {id:906,icon:'🎯',cat:'slang',title:'PMF（产品市场匹配）',content:'Product-Market Fit，产品找到了一群愿意持续使用并付费的目标用户。PMF的标志：留存曲线变平（用户留下来不走）、自然增长（用户主动推荐朋友）、付费意愿强。如何判断PMF：看7日留存是否稳定在品类基准线以上、用户离开后会不会回来、没有广告投放还能不能增长。没到PMF就大量买量是浪费钱。运营在PMF中的角色：收集用户反馈、分析行为数据、协助产品迭代。',notes:'',fav:false,time:Date.now()},
+    {id:907,icon:'🎯',cat:'slang',title:'SOP（标准作业程序）',content:'Standard Operating Procedure，把重复性工作标准化成可复用的操作步骤。运营SOP的必要性：新人上手需要有章可循、多人协作需口径一致、活动2.0时可直接复用流程。常见运营SOP：活动上线SOP（配置→测试→公告→灰度→全量→监控）、日报周报SOP（数据→分析→行动→本周→下周）、版本更新SOP、客服反馈SOP。写好SOP的关键：步骤可执行（任何人照着做都能出相同结果）、有检查清单、持续更新。',notes:'',fav:false,time:Date.now()},
+    {id:908,icon:'🎯',cat:'slang',title:'ASO（应用商店优化）',content:'App Store Optimization，提升游戏在应用商店搜索排名和转化率。核心因素：①标题/副标题（含核心关键词，iOS 30字符/安卓更灵活）②关键词域（iOS 100字符填满热词）③图标（突出风格+辨识度）④截图/视频（前3张最关键）⑤评分评论（评分4.5+才能进推荐）⑥下载量/留存率（权重逐渐增加）。ASO做得好，自然量可占总新增30-50%，是性价比最高的获客方式。',notes:'',fav:false,time:Date.now()},
+    {id:909,icon:'🎯',cat:'slang',title:'F2P/P2P（付费模式）',content:'F2P（Free to Play）：免费游玩+内购/广告变现。目前手游主流模式，用户零门槛进入，靠内购和广告盈利。核心指标：付费渗透率（多少人付了钱）ARPU（每用户收入）LTV（生命周期价值）。P2P（Pay to Play）：付费才能玩，如买断制游戏（原价$60-70）。主机/PC游戏为主，手游较少。混合变现：F2P+广告（最推荐，适合中度游戏）。两种模式的关键差异：F2P赚的是大R的钱（80%收入来自20%用户），P2P赚的是所有人的入门费。',notes:'',fav:false,time:Date.now()},
+    {id:910,icon:'🎯',cat:'slang',title:'PVP/PVE（战斗模式）',content:'PVP（Player vs Player）：玩家对玩家。核心爽点：与人斗其乐无穷、排名竞争、实力证明。典型游戏：王者荣耀、吃鸡、皇室战争。运营注意：PVP需要平衡调整、段位/赛季系统、防外挂。PVE（Player vs Environment）：玩家对环境（电脑AI）。核心爽点：挑战BOSS、通关成就感、合作配合。典型：原神副本、梦幻西游打图、MMO团本。混合：大部分游戏是PVE+PVP结合，PVE做内容长线，PVP做竞技常青。',notes:'',fav:false,time:Date.now()},
+    {id:911,icon:'🎯',cat:'slang',title:'ROI（投资回报率）',content:'Return on Investment，投资收益÷投资成本×100%。ROI>100%就是赚钱，ROI<100%就是在亏。游戏运营中的ROI：买量ROI（买量花费→用户付费）、活动ROI（活动成本→活动收入）、内容ROI（内容制作成本→内容带来的留存/付费提升）。注意ROI和ROAS的区别：ROI看整体投入产出比（包含所有成本），ROAS只看广告支出和广告收入的比例。ROI更全面，ROAS更聚焦买量。月报必须汇报各渠道ROI。',notes:'',fav:false,time:Date.now()},
+    {id:912,icon:'🎯',cat:'slang',title:'内测/公测/封测（游戏测试类型）',content:'游戏上线前的三个关键测试阶段。封测/内测（Closed Beta）：小规模（几百到几千人），核心验证玩法和经济系统。通常发码限制人数，数据不删档看情况。公测（Open Beta）：更大范围（万级别），验证服务器压力、大规模留存数据、商业模式。现在很多游戏公测≈正式上线。压力测试（Stress Test）：专门测试服务器承载上限，通常持续几小时到几天。运营关注：每个测试阶段的数据指标门槛、用户反馈收集、BUG修复进度。',notes:'',fav:false,time:Date.now()},
+    {id:913,icon:'🎯',cat:'slang',title:'品牌联名/IP联动',content:'两个品牌合作推出联合内容。游戏行业最常见的运营手段之一。类型：游戏×动漫（原神×KFC）、游戏×游戏（王者×仙剑）、游戏×品牌（吃鸡×奔驰）。好处：互相导量、制造话题、提升品牌调性、带动付费。运营注意：选IP要考虑用户画像是否匹配、合作形式是否自然（不要硬塞）、限定内容要有说服力。成功案例：原神每次联动都引发社媒热议，王者荣耀文创联动频频出圈。',notes:'',fav:false,time:Date.now()},
+    {id:914,icon:'🎯',cat:'slang',title:'联运（联合运营）',content:'研发和发行多方合作共同运营一款游戏。常见模式：研发商做产品，发行商/渠道商做运营推广，按比例分成。国内联运生态：硬核联盟（华为/小米/OV）联运分成50%+、渠道联运（应用宝/百度）、第三方联运（B站/TapTap）。运营的联运工作：渠道素材管理、渠道数据对接、渠道活动支持、渠道评级。一句话：联运是游戏行业的常见合作方式，理解清楚谁拿多少钱、谁做什么事。',notes:'',fav:false,time:Date.now()},
+    {id:915,icon:'🎯',cat:'slang',title:'运营职场黑话速查',content:'职场常见"黑话"定义，新入职不被忽悠。对齐：双方信息达成一致。赋能：给某人/某事物添加能力或资源（抽象说就是"帮忙"）。闭环：从开始到反馈的完整流程。颗粒度：指信息的详细程度（"颗粒度不够细"=信息太少，"颗粒够细"=分析到位）。抓手：可切入的点或突破口（"找到活动抓手"=找到活动的切入点）。底层逻辑：事物最根本的原因或规律。方法论：解决问题的一套系统方法。复盘：回顾+分析+总结（不是简单的总结，要提炼可复用的经验）。落地：把想法变成实际的执行。痛点：用户遇到的问题。打透：把一个方向做深做透。',notes:'',fav:false,time:Date.now()},
+
+    // ====== 📚 补充书单（3条）======
+    {id:920,icon:'📚',cat:'book',title:'《硅谷增长黑客实战笔记》',content:'曲卉。增长黑客理论落地实操指南。核心：建立增长团队、设计实验体系、用数据驱动决策。比《增长黑客》更实战，有具体流程和模板。适合有1-2年经验的运营进阶。关键方法论：增长会议模板、ICE评分体系、AARRR各环节优化技巧。',notes:'',fav:false,time:Date.now()},
+    {id:921,icon:'📚',cat:'book',title:'《游戏数据分析实战》',content:'黎湘艳。从数据角度解读游戏运营。核心模块：用户获取分析、留存分析、付费分析、社交分析。大量真实案例，适合0-3年数据运营入门。最有用章节：如何搭建游戏数据指标体系、如何通过数据分析定位流失原因、如何用数据评估活动效果。读完能独立做日常数据报表和简单分析。',notes:'',fav:false,time:Date.now()},
+    {id:922,icon:'📚',cat:'book',title:'《秒赞：文案写作训练手册》',content:'林桂枝。运营文案实操指南。核心：标题怎么写吸引人、海报文案怎么写不啰嗦、Push文案怎么写让人想点。运营日常需要大量文案输出——活动公告、推送文案、社区帖子、广告语。这本书不讲理论只讲方法，适合新手快速上手。运营文案黄金法则：说人话、有利益、有行动。',notes:'',fav:false,time:Date.now()},
 
 function runAutoLink(){
   const kwMap = {};
