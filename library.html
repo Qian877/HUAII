@@ -111,6 +111,9 @@ body{
 .link-tag:hover{background:rgba(244,143,177,0.2);border-color:#f48fb1;transform:translateY(-1px);}
 .link-tag.missing{color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1);}
 .link-tag.missing:hover{color:#f48fb1;border-color:rgba(244,143,177,0.3);background:rgba(244,143,177,0.08);}
+/* ===== 正文名词高亮 ===== */
+.inline-link{color:#f48fb1;cursor:pointer;text-decoration:none;border-bottom:1px dashed rgba(244,143,177,0.35);transition:all 0.15s;}
+.inline-link:hover{color:#f06292;border-bottom-color:#f06292;background:rgba(244,143,177,0.08);border-radius:2px;}
 .new-links-area{margin-bottom:14px;}
 .new-links-area label{display:block;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
 .new-links-hint{font-size:10px;color:rgba(255,255,255,0.2);margin-top:3px;}
@@ -373,22 +376,43 @@ function loadDefaults(){
     {id:709,icon:'📚',cat:'book',title:'《行为设计学》',content:'Chip Heath。小改变→放大的→容易做→有动力。适合做用户行为和运营流程设计。',notes:'',fav:false,time:Date.now()-864e5*6},
     {id:710,icon:'📚',cat:'book',title:'《俞军产品方法论》',content:'产品价值=(新体验-旧体验)-替换成本。交易模型+用户模型是产品核心能力。产品和运营一起读效果更好。',notes:'',fav:false,time:Date.now()-864e5*6},
   ];
-  // 自动关联知识：扫描所有条目内容中的关键词，自动建立links
+  // 自动关联知识（增强版）：内容匹配 + 同分类关联 + 标题层级关联
   const kwMap = {};
   library.forEach(i=>{
     const m = i.title.match(/^([^（(]+)/);
-    kwMap[m?m[1].trim():i.title] = i.title;
+    kwMap[m?m[1].trim():i.title] = {title:i.title, cat:i.cat};
   });
+  // 按关键词长度降序排序（长关键词优先匹配，避免短词覆盖）
+  const sortedKw = Object.keys(kwMap).sort((a,b)=>b.length-a.length);
   library.forEach(item=>{
     if(!item.links) item.links = [];
-    Object.entries(kwMap).forEach(([kw,title])=>{
-      if(title===item.title) return;
-      if(item.content.includes(kw)||item.content.includes(title)){
+    // 1. 内容关键词匹配
+    sortedKw.forEach(kw=>{
+      const info = kwMap[kw];
+      if(info.title===item.title) return;
+      if(item.content.includes(kw)||item.content.includes(info.title)){
         if(!item.links.includes(kw)) item.links.push(kw);
       }
     });
-    item.links = item.links.slice(0,10);
+    // 2. 同分类关联（同分类其他条目标题中出现的关键词）
+    library.forEach(other=>{
+      if(other.id===item.id) return;
+      if(other.cat===item.cat){
+        sortedKw.forEach(kw=>{
+          const info = kwMap[kw];
+          if(info.title===item.title) return;
+          if(other.content.includes(kw)&&item.content.includes(kw)){
+            if(!item.links.includes(kw)) item.links.push(kw);
+          }
+        });
+      }
+    });
+    // 3. 去重，限制最多20个
+    item.links = [...new Set(item.links)].slice(0,20);
   });
+  // 保存所有关键词列表用于正文高亮
+  window._libraryKeywords = sortedKw;
+  save();
   save();
 }
 
@@ -516,13 +540,35 @@ function renderFavorites(area){
 }
 
 // ====== Detail Dialog ======
+// 正文专有名词高亮
+function linkifyContent(text){
+  // 转义HTML
+  let t = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const kwMap = {};
+  library.forEach(i=>{
+    const m = i.title.match(/^([^（(]+)/);
+    if(m) kwMap[m[1].trim()] = i;
+  });
+  // 按长度降序（长词优先）
+  const sorted = Object.keys(kwMap).sort((a,b)=>b.length-a.length);
+  sorted.forEach(kw=>{
+    const item = kwMap[kw];
+    if(!t.includes(kw)) return;
+    // 用正则匹配：前后不是中英文/数字（防止部分匹配）
+    const re = new RegExp('(^|[^\u4e00-\u9fff\w])('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')([^\u4e00-\u9fff\w]|$)', 'g');
+    t = t.replace(re, (match, pre, kw, post)=>{
+      return pre+`<a class="inline-link" onclick="event.stopPropagation();openDetail(${item.id})" title="${item.icon||'📝'} ${item.title}">${kw}</a>`+post;
+    });
+  });
+  return t;
+}
 function openDetail(id){
   const i = library.find(x=>x.id===id);
   if(!i)return;
   currentItemId = id;
   document.getElementById('dlgEmoji').textContent = i.icon||'📝';
   document.getElementById('dlgTitle').textContent = i.title;
-  document.getElementById('dlgContent').textContent = i.content;
+  document.getElementById('dlgContent').innerHTML = linkifyContent(i.content);
   const d=new Date(i.time);
   document.getElementById('dlgDate').textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
   document.getElementById('dlgNotes').value = i.notes||'';
